@@ -127,3 +127,21 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Ranking
+avatar/
+cookies/
+data/
+fast_view/
+fonts/
+log/
+output_all/
+output_clips/
+output_image/
+video/
+custom/
+cover/
+
+TEditor.exe
+lux.exe
+AutoData/
