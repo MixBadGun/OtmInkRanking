@@ -6,8 +6,27 @@ import requests
 import os
 import shutil
 import logging
+import unicodedata
+from PIL import Image
+
+from config import *
 
 usedTime = time.strftime("%Y%m%d", time.localtime())
+
+def real_len(letter):
+    if (unicodedata.east_asian_width(letter) in ('F','W','A')):
+        return 2
+    else:
+        return 1
+
+def all_len(text,maxlen):
+    ink = 0
+    outlen = 0
+    for lett in text:
+        if outlen < maxlen:
+            ink += 1
+        outlen += real_len(lett)
+    return outlen , ink
 
 def reasons(reasoning):
     reason = []
@@ -28,13 +47,20 @@ with open('data/customed.csv','w',encoding="utf-8-sig", newline='') as csvWrites
         else:
             uploader = owner
             shutil.copy("./template/avatar/truck.png",f"./avatar/{custed['aid']}.png")
+        # 标题伸缩
         timed = time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(custed["pubdate"])))
+        allLength , shortRange = all_len(custed["title"],main_max_title * 2)
+        if (allLength > main_max_title * 2):
+            custtitle = custed["title"][0:shortRange - 1] + "..."
+        else:
+            custtitle = custed["title"]
+        # 列表添加
         oneArr = [
             "","",
             custed["aid"],
             custed["bvid"],
             custed["cid"],
-            custed["title"],
+            custtitle,
             uploader,
             custed["stat"]["view"],
             custed["stat"]["like"],
@@ -47,12 +73,24 @@ with open('data/customed.csv','w',encoding="utf-8-sig", newline='') as csvWrites
         writer.writerow(oneArr)
         logging.info("一个 Custom 作品已记录")
         # 下载头像
-        face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(custed["aid"])).json()["data"]["owner"]["face"]
         if os.path.exists("avatar/"+ str(custed["aid"]) + ".png"):
             pass
         else:
-            with open("avatar/"+ str(custed["aid"]) + ".png", "wb") as f:
-                f.write(requests.get(url=face).content)
+            face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(custed["aid"])).json()["data"]["owner"]["face"]
+            if(face.split(".")[-1] in staticFormat): # 判断静态图片
+                with open("avatar/"+ str(custed["aid"]) + ".png", "wb") as f:
+                    f.write(requests.get(url=face).content)
+            else:
+                tempImage = f"avatar/{str(custed['aid'])}.{face.split('.')[-1]}"
+                with open(tempImage, "wb") as f:
+                    f.write(requests.get(url=face).content)
+                    Image.open(tempImage).save("avatar/"+ str(custed['aid']) + ".png")
+        # 下载封面
+        if os.path.exists("cover/"+ str(custed['aid']) + ".png"):
+            pass
+        else:
+            with open("cover/"+ str(custed['aid']) + ".png", "wb") as f:
+                f.write(requests.get(url=custed["pic"]).content)
     if os.path.exists("./custom/custom.csv"):
         with open("custom/custom.csv",encoding="utf-8-sig",newline='') as csvfile:
             custInfo = csv.DictReader(csvfile)
