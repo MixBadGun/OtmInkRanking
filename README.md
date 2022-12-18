@@ -23,11 +23,11 @@
 
 ## 非自定义自动化获取数据（含评分、视频合成）
 首先爬取数据。
-```python advanced_main.py```
+>```python advanced_main.py```
 随后进行视频合成。
-```python main.py```
+>```python main.py```
 
 ## 自定义作品获取数据（仅数据）
 在`custom/custom.csv`文件按格式填写`aid（作品 av 号，不含 av 前缀）`、`owner（自定义视频作者，非搬运请留空）`。
-```python custom.py```
+>```python custom.py```
 随后请提取`data/customed.csv`，使用 TEditor 导入`template/main.ted`模板自行合成图片。
