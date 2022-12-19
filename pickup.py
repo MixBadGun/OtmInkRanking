@@ -6,6 +6,14 @@ import requests
 import os
 import shutil
 import logging
+import unicodedata
+from config import *
+
+def real_len(letter):
+    if (unicodedata.east_asian_width(letter) in ('F','W','A')):
+        return 2
+    else:
+        return 1
 
 def pickData(mainArr):
 
@@ -13,11 +21,19 @@ def pickData(mainArr):
     usedTime = time.strftime("%Y%m%d", time.localtime())
 
     def reasons(reasoning):
-        reason = []
-        for charc in range(len(reasoning)):
-            if charc % 14 == 0:
-                reason.append(reasoning[charc:charc+14])
-        return "\n".join(reason)
+        reason = ""
+        max_n = 0
+        for charc in reasoning:
+            if charc == "\n":
+                max_n = 0
+                reason += "\n"
+                continue
+            if max_n >= pick_max_reason:
+                reason += "\n"
+                max_n = 0
+            reason += charc
+            max_n += real_len(charc)
+        return reason
     pickHeader = ["aid","bvid","cid","title","reason","uploader","pubtime","full_time"]
 
     with open('data/picked.csv','w',encoding="utf-8-sig", newline='') as csvWrites:
