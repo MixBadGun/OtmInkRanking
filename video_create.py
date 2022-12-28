@@ -7,7 +7,6 @@ from config import *
 screensize = (1920,1080)
 
 def MainVideo(aid,start_time,sep_time,ranking):
-    muitl_limit.acquire()
     # 获取模板文件
 
     mainStart = VideoFileClip("./template/main/back_come.mp4")
