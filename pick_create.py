@@ -2,12 +2,13 @@ import logging
 from os import sep
 from turtle import bgcolor
 from moviepy.editor import *
+from config import *
 # 变量声明
 
 screensize = (1920,1080)
 
 def PickVideo(aid,start_time,sep_time,picks):
-
+    muitl_limit.acquire()
     # 获取模板文件
 
     pickStart = VideoFileClip("./template/pick/pick_come.mp4")
@@ -36,3 +37,4 @@ def PickVideo(aid,start_time,sep_time,picks):
 
     for l in [pickStart,pickDuring,pickEnd,pick_back,pickMaskStart,pickMaskDuring,pickMaskEnd,pick_mask,coverImage,videoSource,usingVideoSource,usingVideoSourceMasked,combinationVideo]:
         l.close()
+    muitl_limit.release()

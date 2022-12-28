@@ -1,12 +1,13 @@
 import logging
 from os import sep
 from moviepy.editor import *
+from config import *
 # 变量声明
 
 screensize = (1920,1080)
 
 def MainVideo(aid,start_time,sep_time,ranking):
-
+    muitl_limit.acquire()
     # 获取模板文件
 
     mainStart = VideoFileClip("./template/main/back_come.mp4")
@@ -35,3 +36,5 @@ def MainVideo(aid,start_time,sep_time,ranking):
 
     for l in [mainStart,mainDuring,mainEnd,main_back,mainMaskStart,mainMaskDuring,mainMaskEnd,main_mask,coverImage,videoSource,usingVideoSource,usingVideoSourceMasked,combinationVideo]:
         l.close()
+
+    muitl_limit.release()

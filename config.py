@@ -1,5 +1,6 @@
 import time
 import os
+import threading
 if os.path.exists("./custom/time.txt"):
     usedTime = str(open("./custom/time.txt","r").read())
 else:
@@ -14,3 +15,5 @@ main_end = 15 # 主榜个数
 side_end = 40 # 副榜个数
 side_count = 4 # 副榜显示
 staticFormat = ["png","jpg","jpeg"]
+
+muitl_limit = threading.Semaphore(5)

@@ -4,6 +4,7 @@ import subprocess
 import os
 import csv
 import requests
+import threading
 from PIL import Image
 from moviepy.editor import *
 from video_create import MainVideo
@@ -120,7 +121,7 @@ if os.path.exists("./data/picked.csv"):
     os.remove("./data/picked.csv")
 
 # 主榜段落合成
-
+muitl_render = []
 for viding in ranked_list:
     ranking = int(viding[0])
     if ranking > main_end:
@@ -133,7 +134,12 @@ for viding in ranked_list:
     getVideo(aid)
     full_time = exactVideoLength(aid)
     start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
-    MainVideo(aid,start_time,end_time,ranking)
+    muitl_limit.acquire()
+    single_render = threading.Thread(target=MainVideo,args=(aid,start_time,end_time,ranking))
+    single_render.start()
+    muitl_render.append(single_render)
+for fg in muitl_render:
+    fg.join()
 
 # 副榜段落合成
 if os.path.exists("./output_clips/SideRank.mp4"):
@@ -143,7 +149,7 @@ else:
 
 # PICK UP 合成
 picks = 0
-
+muitl_render = []
 for picking in pickArr:
     picks += 1
     if os.path.exists(f"./output_clips/PickRank_{picks}.mp4"):
@@ -154,7 +160,12 @@ for picking in pickArr:
     getVideo(aid)
     full_time = exactVideoLength(aid)
     start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
-    PickVideo(aid,start_time,end_time,picks)
+    muitl_limit.acquire()
+    single_render = threading.Thread(target=PickVideo,args=(aid,start_time,end_time,picks))
+    single_render.start()
+    muitl_render.append(single_render)
+for fg in muitl_render:
+    fg.join()
 
 # 开头简要合成
 if os.path.exists("./output_clips/Opening.mp4"):
