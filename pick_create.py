@@ -8,7 +8,6 @@ from config import *
 screensize = (1920,1080)
 
 def PickVideo(aid,start_time,sep_time,picks):
-    muitl_limit.acquire()
     # 获取模板文件
 
     pickStart = VideoFileClip("./template/pick/pick_come.mp4")
