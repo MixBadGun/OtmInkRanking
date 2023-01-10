@@ -1,5 +1,4 @@
 import csv
-import requests
 import time
 import logging
 import os
@@ -79,11 +78,11 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
     for vid in vid_list:
         ranking += 1
         # 判断长度进行伸缩
-        if (ranking < main_end):
+        if (ranking <= main_end):
             allLength , shortRange = all_len(vid[4],main_max_title * 2)
             if (allLength > main_max_title * 2):
                 vid[4] = vid[4][0:shortRange - 1] + "..."
-        elif (ranking < side_end):
+        elif (ranking <= main_end + side_end):
             allLength , shortRange = all_len(vid[4],side_max_title * 2)
             if (allLength > side_max_title * 2):
                 vid[4] = vid[4][0:shortRange - 1] + "..."
