@@ -69,7 +69,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(all_video_info[video]["stat"]["coin"]),
             str(all_video_info[video]["stat"]["favorite"]),
             str(all_video_info[video]["pic"]),
-            time.strftime("%m/%d %H:%M:%S",time.localtime(int(all_video_info[video]["pubdate"]))),
+            time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(all_video_info[video]["pubdate"]))),
             str(normk)
         ])
     vid_list.sort(key=lambda x:x[0],reverse=True)
