@@ -29,7 +29,7 @@ target_bad_key_words = ["加油","注意","建议","进步","稚嫩","不足","�
 if not os.path.exists(base_path): os.makedirs(base_path)
 str_time = datetime.datetime.strptime(str_time,"%y%m%d")
 src_time = str_time + datetime.timedelta(days=-delta_days)
-dst_time = src_time + datetime.timedelta(days=1) # 一共统计 7 天
+dst_time = src_time + datetime.timedelta(days=7) # 一共统计 7 天
 logging.info(f"选取日期 从 {src_time.strftime('%y/%m/%d-%H:%m')} 到 {dst_time.strftime('%y/%m/%d-%H:%m')}")
 data_folder_name = src_time.strftime("%y%m%d") + "-" + dst_time.strftime("%y%m%d")
 data_path = os.path.join(base_path, data_folder_name)
