@@ -10,8 +10,12 @@ logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(f
 from auto_pipeline_func import *
 
 str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期，到时候可以用datetime.datetime.now().strftime('%y%m%d')来代替
-delta_days = 10 # 从今天开始往前推多少天
+delta_days = 10 # 以今天往前的第 delta_days 日开始统计
 base_path = "./AutoData/"   # 数据存储路径
+
+video_zones = [26,126,22]
+# 鬼畜: 119（不要用这个）; 音 MAD: 26; 人力: 126; 鬼调: 22
+# 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/video/video_zone.md
 
 # 其实这些关键词的影响并不大
 target_good_key_words = [
@@ -25,26 +29,35 @@ target_bad_key_words = ["加油","注意","建议","进步","稚嫩","不足","�
 if not os.path.exists(base_path): os.makedirs(base_path)
 str_time = datetime.datetime.strptime(str_time,"%y%m%d")
 src_time = str_time + datetime.timedelta(days=-delta_days)
-dst_time = src_time + datetime.timedelta(days=7) # 7天
-logging.info(f"选取日期 从 {src_time.strftime('%y/%m/%d-%H:&m')} 到 {dst_time.strftime('%y/%m/%d-%H:&m')}")
+dst_time = src_time + datetime.timedelta(days=7) # 一共统计 7 天
+logging.info(f"选取日期 从 {src_time.strftime('%y/%m/%d-%H:%m')} 到 {dst_time.strftime('%y/%m/%d-%H:%m')}")
 data_folder_name = src_time.strftime("%y%m%d") + "-" + dst_time.strftime("%y%m%d")
 data_path = os.path.join(base_path, data_folder_name)
 if not os.path.exists(data_path): os.makedirs(data_path)
 
-all_video_info = retrieve_video_info(src_time.timestamp(), dst_time.timestamp(), data_path)
+all_video_info: Dict[int, Dict] = {}
+for video_zone in video_zones:
+    logging.info(f"正在获取分区 {video_zone} 的视频信息")
+    all_video_info_in_subzone = retrieve_video_info(src_time.timestamp(), dst_time.timestamp(), data_path, video_zone)
+    logging.info(f"分区 {video_zone} 的视频信息获取完成，本分区视频总数: {len(all_video_info_in_subzone)}")
+    all_video_info.update(all_video_info_in_subzone)
 # for video_info in all_video_info.values():
 #     video_pubtime   = datetime.datetime.fromtimestamp(video_info['pubdate'])
 #     video_aid       = video_info['aid']
 #     video_title     = video_info['title']
 #     video_copyright = video_info['copyright']
-#     print(f"video aid: {video_aid}, pubtime: {video_pubtime}, title: {video_title}, copyright: {video_copyright}")
+#     video_zone      = video_info['tid']
+#     print(f"视频 av 号: {video_aid}, 发布时间: {video_pubtime}, 标题: {video_title}, 版权: {video_copyright}, 视频分区: {video_zone}")
+logging.info(f"视频信息获取完成，视频总数: {len(all_video_info)}")
 
 skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, sleep_inteval=1)
 if len(invalid_aid)>0: logging.info("无效的视频aid: " + str(invalid_aid))
 
+logging.info("汇总评论中")
 all_mid_list: Dict[int, Dict[str, Any]] = marshal.load(open(os.path.join(base_path, "all_mid_list.dat"), "rb"))
 mid_s2_list = [mid_info['s2'] for mid_info in all_mid_list.values()]
-all_mid_s2_mean = sum(mid_s2_list) / len(mid_s2_list)
+# all_mid_s2_mean = sum(mid_s2_list) / len(mid_s2_list)
+all_mid_s2_median = calc_median(mid_s2_list)
 # for mid in sorted(all_mid_list.values(), key=lambda x: -x['s1']):
 #     if mid['s1']>10: print("s1 = %7.2f, s2 = %4.2f, mid=%10i, name = %s" % (mid['s1'], mid['s2'], mid['mid'], mid['name'],))
 
@@ -59,6 +72,7 @@ for aid in all_video_info.keys():
         with open(comment_file_path, "r", encoding="utf-8") as f:
             aid_to_comment[aid] = json.load(f)
 
+logging.info("计算视频得分")
 aid_to_score: Dict[int, float] = {}
 aid_to_score_norm: Dict[int, float] = {}
 for video_info in all_video_info.values():
@@ -66,34 +80,35 @@ for video_info in all_video_info.values():
     video_score, video_score_norm = calc_aid_score(
         video_info, aid_to_comment[video_aid],
         target_good_key_words, target_bad_key_words,
-        all_mid_list, s2_base=all_mid_s2_mean)
+        all_mid_list, s2_base=all_mid_s2_median)
     aid_to_score[video_aid] = video_score
     aid_to_score_norm[video_aid] = video_score_norm
 
-aid_and_score: List[Tuple[int, float]] = []
-for aid in aid_to_score:
-    video_info   = all_video_info[aid]
-    aid_score, aid_score_norm = calc_aid_score(video_info, aid_to_comment[aid], target_good_key_words, target_bad_key_words, all_mid_list)
-    if video_info["copyright"]==1: aid_and_score.append((aid, aid_score_norm))
-aid_and_score.sort(key=lambda x: -x[1])
-for aid, aid_score in aid_and_score[:100]: # 排名前100的视频
-    # print_aid_info(aid, verbose=False)
-    video_info = all_video_info[aid]
-    aid_author     = video_info["owner"]["name"]
-    aiu_mid        = video_info["owner"]["mid"]
-    aid_view       = video_info['stat']['view']
-    aid_title      = video_info['title']
-    aid_favorite   = video_info['stat']['favorite']
-    aid_view       = aid_view if aid_view >= 0 else 0
-    aid_comment    = aid_to_comment[aid]
-    _, aid_score_norm = calc_aid_score(video_info, aid_comment, target_good_key_words, target_bad_key_words, all_mid_list)
-    aid_pubtime = datetime.datetime.fromtimestamp(video_info["pubdate"]).strftime("%y%m%d-%H%M%S")
-    print("[av %i] 计分 = %5.3f @%s, 播放 %6i, 收藏 %5i, 评论 %3i || [uid %10i] %s: %s" % (aid, aid_score_norm, aid_pubtime, aid_view, aid_favorite, len(aid_comment), aiu_mid, aid_author, aid_title))
+# aid_and_score: List[Tuple[int, float]] = []
+# for aid in aid_to_score:
+#     video_info   = all_video_info[aid]
+#     aid_score, aid_score_norm = calc_aid_score(video_info, aid_to_comment[aid], target_good_key_words, target_bad_key_words, all_mid_list, s2_base=all_mid_s2_median)
+#     if video_info["copyright"]==1: aid_and_score.append((aid, aid_score_norm))
+# aid_and_score.sort(key=lambda x: -x[1])
+# for aid, aid_score in aid_and_score[:100]: # 排名前100的视频
+#     # print_aid_info(aid, verbose=False)
+#     video_info = all_video_info[aid]
+#     aid_author     = video_info["owner"]["name"]
+#     aiu_mid        = video_info["owner"]["mid"]
+#     aid_view       = video_info['stat']['view']
+#     aid_title      = video_info['title']
+#     aid_favorite   = video_info['stat']['favorite']
+#     aid_view       = aid_view if aid_view >= 0 else 0
+#     aid_comment    = aid_to_comment[aid]
+#     _, aid_score_norm = calc_aid_score(video_info, aid_comment, target_good_key_words, target_bad_key_words, all_mid_list)
+#     aid_pubtime = datetime.datetime.fromtimestamp(video_info["pubdate"]).strftime("%y%m%d-%H%M%S")
+#     print("[av %i] 计分 = %5.6f @%s, 播放 %6i, 收藏 %5i, 评论 %3i || [uid %10i] %s: %s" % (aid, aid_score_norm, aid_pubtime, aid_view, aid_favorite, len(aid_comment), aiu_mid, aid_author, aid_title))
 
 """
 >>> print(all_video_info[943387336])
 {'aid': 943387336,
     'videos': 1,
+    'tid': 26,
     'tname': 1664808239.21716,
     'copyright': 1,
     'pic': 'http://i0.hdslb.com/bfs/archive/9164a49a07f606cb1505f02f8bd2df2da150dadd.jpg',
