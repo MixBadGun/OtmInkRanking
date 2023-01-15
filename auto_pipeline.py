@@ -2,6 +2,7 @@ import json
 import os
 from typing import List,Tuple,Dict,Union,Optional,Any
 import marshal
+import pickle
 import datetime
 import logging
 from collections import defaultdict
@@ -9,11 +10,12 @@ logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(f
 
 from auto_pipeline_func import *
 
-str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期，到时候可以用datetime.datetime.now().strftime('%y%m%d')来代替
+str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期
 delta_days = 10 # 以今天往前的第 delta_days 日开始统计
+range_days = 7 # 统计 range_days 天的数据
 base_path = "./AutoData/"   # 数据存储路径
 
-video_zones = [26,126,22]
+video_zones = [22]
 # 鬼畜: 119（不要用这个）; 音 MAD: 26; 人力: 126; 鬼调: 22
 # 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/video/video_zone.md
 
@@ -26,10 +28,15 @@ target_good_key_words = [
 target_bad_key_words = ["加油","注意","建议","进步","稚嫩","不足","不好",
                         "文艺复兴","倒退","大势所趋","dssq","烂"]
 
+# 改动这个筛选条件之后，需要先把 AutoData/这次的数据/comment_data/ 和 AutoData/这次的数据/invalid_aid.pkl 删掉
+tag_whitelist = ['音MAD']
+tag_whitezone = [26]
+whitelist_filter = lambda video_info, tags: (video_info['tid'] in tag_whitezone) or (len(set(tags).intersection(tag_whitelist))>0)
+
 if not os.path.exists(base_path): os.makedirs(base_path)
 str_time = datetime.datetime.strptime(str_time,"%y%m%d")
 src_time = str_time + datetime.timedelta(days=-delta_days)
-dst_time = src_time + datetime.timedelta(days=7) # 一共统计 7 天
+dst_time = src_time + datetime.timedelta(days=range_days)
 logging.info(f"选取日期 从 {src_time.strftime('%y/%m/%d-%H:%m')} 到 {dst_time.strftime('%y/%m/%d-%H:%m')}")
 data_folder_name = src_time.strftime("%y%m%d") + "-" + dst_time.strftime("%y%m%d")
 data_path = os.path.join(base_path, data_folder_name)
@@ -50,8 +57,10 @@ for video_zone in video_zones:
 #     print(f"视频 av 号: {video_aid}, 发布时间: {video_pubtime}, 标题: {video_title}, 版权: {video_copyright}, 视频分区: {video_zone}")
 logging.info(f"视频信息获取完成，视频总数: {len(all_video_info)}")
 
-skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, sleep_inteval=1)
-if len(invalid_aid)>0: logging.info("无效的视频aid: " + str(invalid_aid))
+skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, whitelist_filter, sleep_inteval=1)
+if len(skipped_aid)>0: logging.warning("被跳过的 aid: " + str(skipped_aid))
+if len(invalid_aid)>0: logging.info("无效或被过滤的 aid: " + str(invalid_aid))
+marshal.dump(invalid_aid, open(os.path.join(data_path, "invalid_aid.pkl"), "wb"))
 
 logging.info("汇总评论中")
 all_mid_list: Dict[int, Dict[str, Any]] = marshal.load(open(os.path.join(base_path, "all_mid_list.dat"), "rb"))
@@ -62,15 +71,19 @@ all_mid_s2_median = calc_median(mid_s2_list)
 #     if mid['s1']>10: print("s1 = %7.2f, s2 = %4.2f, mid=%10i, name = %s" % (mid['s1'], mid['s2'], mid['mid'], mid['name'],))
 
 aid_to_comment: Dict[int, List[Dict]] = defaultdict(list)
+aid_to_tag: Dict[int, List[str]] = defaultdict(list)
 for aid in all_video_info.keys():
     comment_file_path = os.path.join(data_path, "comment_data", f"{aid}.json")
     if not (os.path.exists(comment_file_path) or aid in invalid_aid or all_video_info[aid]['copyright']!=1):
-        logging.error(f"comment file {comment_file_path} not found")
-        skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, sleep_inteval=1)
+        logging.warning(f"comment file {comment_file_path} not found")
+        _, invalid_aid = retrieve_video_comment(data_path, all_video_info, sleep_inteval=1)
         if not os.path.exists(comment_file_path) or aid in invalid_aid: continue
     if aid not in invalid_aid and all_video_info[aid]['copyright'] == 1:
         with open(comment_file_path, "r", encoding="utf-8") as f:
-            aid_to_comment[aid] = json.load(f)
+            comment_data = json.load(f)
+            if 'comment' not in comment_data: continue
+            aid_to_tag[aid] = comment_data['tag']
+            aid_to_comment[aid] = comment_data['comment']
 
 logging.info("计算视频得分")
 aid_to_score: Dict[int, float] = {}
@@ -83,6 +96,7 @@ for video_info in all_video_info.values():
         all_mid_list, s2_base=all_mid_s2_median)
     aid_to_score[video_aid] = video_score
     aid_to_score_norm[video_aid] = video_score_norm
+logging.info("计分完成")
 
 # aid_and_score: List[Tuple[int, float]] = []
 # for aid in aid_to_score:
@@ -135,8 +149,10 @@ for video_info in all_video_info.values():
     'pub_location': '重庆',
     'bvid': 'BV1rW4y1v7YJ',
     'season_type': 0}
+    
 >>> print(aid_to_score_norm[943387336])
 2.185153921295668
+
+>>> print(aid_to_tag[943387336])
+['鬼畜', '音MAD', '打鸣', '鸡', 'すりぃ', 'エゴロック', '自我摇滚', '鬼畜星探企划']
 """
-
-
