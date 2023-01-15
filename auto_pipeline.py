@@ -56,7 +56,8 @@ if len(invalid_aid)>0: logging.info("无效的视频aid: " + str(invalid_aid))
 logging.info("汇总评论中")
 all_mid_list: Dict[int, Dict[str, Any]] = marshal.load(open(os.path.join(base_path, "all_mid_list.dat"), "rb"))
 mid_s2_list = [mid_info['s2'] for mid_info in all_mid_list.values()]
-all_mid_s2_mean = sum(mid_s2_list) / len(mid_s2_list)
+# all_mid_s2_mean = sum(mid_s2_list) / len(mid_s2_list)
+all_mid_s2_median = calc_median(mid_s2_list)
 # for mid in sorted(all_mid_list.values(), key=lambda x: -x['s1']):
 #     if mid['s1']>10: print("s1 = %7.2f, s2 = %4.2f, mid=%10i, name = %s" % (mid['s1'], mid['s2'], mid['mid'], mid['name'],))
 
@@ -79,14 +80,14 @@ for video_info in all_video_info.values():
     video_score, video_score_norm = calc_aid_score(
         video_info, aid_to_comment[video_aid],
         target_good_key_words, target_bad_key_words,
-        all_mid_list, s2_base=all_mid_s2_mean)
+        all_mid_list, s2_base=all_mid_s2_median)
     aid_to_score[video_aid] = video_score
     aid_to_score_norm[video_aid] = video_score_norm
 
 # aid_and_score: List[Tuple[int, float]] = []
 # for aid in aid_to_score:
 #     video_info   = all_video_info[aid]
-#     aid_score, aid_score_norm = calc_aid_score(video_info, aid_to_comment[aid], target_good_key_words, target_bad_key_words, all_mid_list, s2_base=all_mid_s2_mean)
+#     aid_score, aid_score_norm = calc_aid_score(video_info, aid_to_comment[aid], target_good_key_words, target_bad_key_words, all_mid_list, s2_base=all_mid_s2_median)
 #     if video_info["copyright"]==1: aid_and_score.append((aid, aid_score_norm))
 # aid_and_score.sort(key=lambda x: -x[1])
 # for aid, aid_score in aid_and_score[:100]: # 排名前100的视频
