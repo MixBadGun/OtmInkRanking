@@ -1,7 +1,8 @@
 import json
 import time
 import os
-from typing import List,Tuple,Dict,Union,Optional,Any,Set
+from typing import List,Tuple,Dict,Union,Optional,Any,Set,Callable
+from functools import partial
 import random
 import marshal
 import datetime
@@ -11,7 +12,7 @@ import requests
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 
 # pip install bilibili_api_python
-from bilibili_api import comment, sync
+from bilibili_api import comment, sync, video
 from bilibili_api.exceptions import ResponseCodeException
 from bilibili_api.exceptions.NetworkException import NetworkException
 from aiohttp.client_exceptions import ServerDisconnectedError, ClientOSError
@@ -178,9 +179,10 @@ async def get_comments(aid: int) -> List[Dict]:
         time.sleep(1)
     return reply_processer(comments)
 
-def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[Set[int], Set[int]]:
+def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], whitelist_filter: Callable[[Dict, List[str]], bool], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[Set[int], Set[int]]:
     skipped_aid = set()
-    if os.path.exists(os.path.join(data_path, "invalid_aid.pkl")): invalid_aid = marshal.load(open(os.path.join(data_path, "invalid_aid.pkl"), "rb"))
+    invalid_aid_path = os.path.join(data_path, "invalid_aid.pkl")
+    if os.path.exists(invalid_aid_path): invalid_aid = marshal.load(open(invalid_aid_path, "rb"))
     else: invalid_aid = set()
     comment_data_folder = os.path.join(data_path, "comment_data")
     if not os.path.exists(comment_data_folder): os.makedirs(comment_data_folder)
@@ -192,59 +194,36 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force
         video_comment_file_full_path = os.path.join(comment_data_folder, f"{video_aid}.json")
         if not force_update and os.path.exists(video_comment_file_full_path): continue
         if video_aid in invalid_aid: continue
+                
         if video_info["stat"]["reply"] == 0:
-            with open(video_comment_file_full_path, "w", encoding="utf-8") as f: f.write("[]")
+            with open(video_comment_file_full_path, "w", encoding="utf-8") as f:
+                f.write("{}")
             logging.debug(f"av{video_aid} 似乎无评论，已跳过，进度 {n+1: 4} / {len(all_video_info)}")
             continue
         
-        try_times = 0
-        continue_flag = False
-        break_flag = False
-        while try_times < max_try_times:
-            try: 
-                video_comments = sync(get_comments(video_aid))
-                break
-            except (ServerDisconnectedError, ClientOSError):
-                try_times += 1
-                if try_times == max_try_times:
-                    logging.warning(f"ServerDisconnectedError at {video_aid}, skipped")
-                    break_flag = True
-                    break
-            except ResponseCodeException as e:
-                if e.code in {12002, 12061}: # video was likely deleted or moved
-                    logging.warning(f"ResponseCodeException at {video_aid}, aborted")
-                    invalid_aid.add(video_aid)
-                    continue_flag = True
-                else:
-                    logging.error(f"Unhandled ResponseCodeException: {e.code} at {video_aid}, skipped")
-                    break_flag = True
-                break
-            except NetworkException as e:
-                if e.status in {412}: # being blocked by Bilibili
-                    logging.warning(f"NetworkException 412 at {video_aid}, retrying {try_times} times")
-                    try_times += random.randint(0, 1) # give more chance to retry
-                    time.sleep(sleep_inteval * try_times * 2) # sleep longer time
-                else:
-                    logging.error(f"Unhandled NetworkException: {e.status} at {video_aid}, skipped")
-                    break_flag = True
-                    break
-            except Exception as e:
-                logging.error(f"Unhandled Exception: {type(e)} {e}")
-                break_flag = True
-                break
-            finally:
-                time.sleep(sleep_inteval * (try_times + 1))
-        
-        if continue_flag:
+        status, tags = retrieve_single_video_tag(video_aid, max_try_times=max_try_times, sleep_inteval=sleep_inteval)
+        if status <= 0:
+            if status == -1: invalid_aid.add(video_aid)
+            if status == -2: skipped_aid.add(video_aid)
+            time.sleep(sleep_inteval)
             continue
-        if break_flag:
-            skipped_aid.add(video_aid)
+        if not whitelist_filter(video_info, tags):
+            with open(video_comment_file_full_path, "w", encoding="utf-8") as f:
+                f.write(json.dumps({"tag":tags}, ensure_ascii=False, indent=4))
+            logging.debug(f"av{video_aid} 已被过滤，进度 {n+1: 4} / {len(all_video_info)}")
+            invalid_aid.add(video_aid)
+            continue
+        
+        status, comments = retrieve_single_video_comment(video_aid, max_try_times=max_try_times, sleep_inteval=sleep_inteval)
+        if status <= 0:
+            if status == -1: invalid_aid.add(video_aid)
+            if status == -2: skipped_aid.add(video_aid)
             time.sleep(sleep_inteval)
             continue
         
         with open(video_comment_file_full_path, "w", encoding="utf-8") as f:
-            f.write(json.dumps(video_comments, ensure_ascii=False, indent=4))
-        logging.debug(f"获取 av{video_aid} 评论成功，计评论数{len(video_comments): 4}, 进度 {n+1: 4} / {len(all_video_info)}")
+            f.write(json.dumps({"tag":tags, "comment":comments}, ensure_ascii=False, indent=4))
+        logging.debug(f"获取 av{video_aid} 评论成功，计评论数{len(comments): 4}, 进度 {n+1: 4} / {len(all_video_info)}")
     
     if len(invalid_aid)>0: marshal.dump(invalid_aid, open(os.path.join(data_path, "invalid_aid.pkl"), "wb"))
     return skipped_aid, invalid_aid
@@ -295,3 +274,48 @@ def calc_aid_score(video_info: Dict, comment_list: Optional[List[Dict]], good_ke
 #     print("[av %i] (%7.3f -> %6.3f ) @%s, 播放 %6i, 收藏 %5i, 收藏 %3i || [uid %10i] %s: %s" % (aid, aid_score, aid_score_norm, aid_pubtime, aid_view, aid_favorite, len(aid_comment), aiu_mid, aid_author, aid_title))
     
 
+def retrieve_single_video_tag(video_aid: int, max_try_times=10, sleep_inteval=3) -> Tuple[int, List[str]]:
+    task = video.Video(aid=video_aid).get_tags
+    status, tags_raw = apply_bilibili_api(task, video_aid, max_try_times, sleep_inteval)
+    # tags = [{'id':tag['tag_id'], 'name':tag['tag_name']} for tag in tags_raw]
+    tags = [tag['tag_name'] for tag in tags_raw]
+    return status, tags
+
+def retrieve_single_video_comment(video_aid: int, max_try_times=10, sleep_inteval=3) -> Tuple[int, List[Dict]]:
+    task = partial(get_comments, video_aid)
+    status, comments_raw = apply_bilibili_api(task, video_aid, max_try_times, sleep_inteval)
+    return status, comments_raw
+
+def apply_bilibili_api(task: Callable, video_aid: int, max_try_times=10, sleep_inteval=3) -> Tuple[int, List[Dict]]:
+    try_times = 0
+    while try_times < max_try_times:
+        try: 
+            contents = sync(task())
+            break
+        except (ServerDisconnectedError, ClientOSError):
+            try_times += 1
+            if try_times == max_try_times: # 网络错误
+                logging.warning(f"ServerDisconnectedError at {video_aid}, skipped")
+                return -2, []
+        except ResponseCodeException as e:
+            if e.code in {12002, 12061}: # 大概是被删了或是移到别的分区了
+                logging.warning(f"ResponseCodeException at {video_aid}, aborted")
+                return -1, [] # Invalid
+            else:
+                logging.error(f"Unhandled ResponseCodeException: {e.code} at {video_aid}, skipped")
+                return -2, []
+        except NetworkException as e:
+            if e.status in {412}: # 被 B 站 ban 了
+                logging.warning(f"NetworkException 412 at {video_aid}, retrying {try_times} times")
+                try_times += random.randint(0, 1)
+                time.sleep(sleep_inteval * try_times * 2)
+            else:
+                logging.error(f"Unhandled NetworkException: {e.status} at {video_aid}, skipped")
+                return -2, [] 
+        except Exception as e:
+            logging.error(f"Unhandled Exception: {type(e)} {e}")
+            return -2, []
+        finally:
+            time.sleep(sleep_inteval * (try_times + 1))
+    
+    return 1, contents
