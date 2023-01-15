@@ -1,7 +1,7 @@
 import json
 import time
 import os
-from typing import List,Tuple,Dict,Union,Optional,Any
+from typing import List,Tuple,Dict,Union,Optional,Any,Set
 import random
 import marshal
 import datetime
@@ -16,8 +16,12 @@ from bilibili_api.exceptions import ResponseCodeException
 from bilibili_api.exceptions.NetworkException import NetworkException
 from aiohttp.client_exceptions import ServerDisconnectedError, ClientOSError
 
+def calc_median(data: List[float]) -> float:
+    data_ = sorted(data)
+    half = len(data) // 2
+    return (data_[half] + data_[~half]) / 2
 
-def get_page_count():
+def get_page_count(video_zone: int) -> int:
     headers = {
         'Accept': '*/*',
         # 'Cookie': raw_cookie,
@@ -25,7 +29,8 @@ def get_page_count():
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) '
                       'Chrome/61.0.3163.79 Safari/537.36 Maxthon/5.0'
     }
-    url = f"https://api.bilibili.com/x/web-interface/newlist?rid=26&type=0&pn=1&ps=1"
+    # ↓只在子分区有效，比如音 MAD 区
+    url = f"http://api.bilibili.com/x/web-interface/newlist?rid={video_zone}&type=0&pn=1&ps=1"
     response = requests.get(url, headers=headers)
     response.encoding = "utf-8"
     result = json.loads(response.text)
@@ -33,14 +38,14 @@ def get_page_count():
         return result["data"]["page"]["count"]
     return -1
 
-def get_info(page: int, ps=20, return_total=True):
+def get_info(page: int, video_zone: int, ps=20):
     headers = {
         'accept': '*/*',
         # 'Cookie': raw_cookie, # using cookie may lessen the prob that being blocked 
-        'referer': 'https://www.bilibili.com/v/kichiku/mad/',
+        'referer': 'https://www.bilibili.com/v/kichiku/mad/', # 我不知道请求不同的分区时，填上正确的 referer 会有什么影响
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.41'
     }
-    url = f"https://api.bilibili.com/x/web-interface/newlist?rid=26&type=0&pn={page}&ps={ps}"
+    url = f"http://api.bilibili.com/x/web-interface/newlist?rid={video_zone}&type=0&pn={page}&ps={ps}" # OR USE HTTPS
     response = requests.get(url, headers=headers)
     response.encoding = "utf-8"
     result = json.loads(response.text)
@@ -49,10 +54,10 @@ def get_info(page: int, ps=20, return_total=True):
     
     if return_code != 0:
         return [return_code, return_message], -1
-    video_list = result["data"]["archives"]
+    video_list: Dict[str, Any] = result["data"]["archives"]
 
     for i, video in enumerate(video_list):
-        video.pop('tid')
+        # video.pop('tid')
         video.pop('state')
         video.pop('rights')
         video.pop("short_link")
@@ -64,13 +69,12 @@ def get_info(page: int, ps=20, return_total=True):
         video["owner"].pop('face')
         video["stat"].pop('aid')
         video["stat"].pop('now_rank')
-        
-    if return_total:
-        return video_list, result["data"]["page"]["count"]
-    return video_list, -1
+    video_count: int = result["data"]["page"]["count"]
+    # print(video_list[0:2])
+    return video_list, video_count
 
-def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: str, sleep_inteval = 4) -> Dict[int, Dict]:
-    video_info_file_name = "video_info.pkl"
+def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: str, video_zone:int, sleep_inteval = 4) -> Dict[int, Dict]:
+    video_info_file_name = "video_info_%i.pkl" % video_zone
     if os.path.exists(os.path.join(data_path, video_info_file_name)):
         with open(os.path.join(data_path, video_info_file_name), "rb") as f:
             all_video_info = marshal.load(f)
@@ -78,28 +82,37 @@ def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: s
     all_video_info: Dict[int, Dict] = dict()
     
     # find the first page that contains the target video that published after `dst_timestamp`
-    page_index = 1
+    page_index = 2
     video_per_page:int = 25
-    page_change_step = 5 # page step of searching which page the dst video in
+    page_change_step = 1 # page step of searching which page the dst video in
+    page_status_dict: Dict[int, bool] = dict()
     while True:
-        info_page, _ = get_info(page_index, video_per_page)
-        is_video_after_dst_time = [i['pubdate']>dst_timestamp for i in info_page]
-        if all(is_video_after_dst_time):
-            logging.info(f"page {page_index} all video were published after {datetime.datetime.fromtimestamp(dst_timestamp)}")
-            page_index += page_change_step
+        if page_index not in page_status_dict:
+            info_page, _ = get_info(page_index, video_zone, video_per_page)
+            is_video_after_dst_time = [i['pubdate']>dst_timestamp for i in info_page]
             time.sleep(sleep_inteval)
+        if (page_index in page_status_dict and page_status_dict[page_index]) or (page_index not in page_status_dict and all(is_video_after_dst_time)):
+            page_status_dict[page_index] = True
+            logging.info(f"第 {page_index} 页所有视频均发布于 {datetime.datetime.fromtimestamp(dst_timestamp)} 之後，其中最早的在 {datetime.datetime.fromtimestamp(info_page[-1]['pubdate'])}")
+            page_change_step *= 2
+            page_index += page_change_step
+            continue
+        elif (page_index in page_status_dict and not page_status_dict[page_index]) or (page_index not in page_status_dict and not any(is_video_after_dst_time)):
+            page_status_dict[page_index] = False
+            logging.info(f"第 {page_index} 页所有视频均发布于 {datetime.datetime.fromtimestamp(dst_timestamp)} 之前，其中最新的在 {datetime.datetime.fromtimestamp(info_page[0]['pubdate'])}")
+            page_change_step = max(1, page_change_step//2)
+            page_index -= page_change_step
+            if page_change_step==1 and page_index in page_status_dict and page_status_dict[page_index]:
+                break
             continue
         elif any(is_video_after_dst_time):
             break
-        else:
-            page_index -= page_change_step
-            break
-    logging.info(f"page_index: {page_index}")
+    logging.info(f"从第 {page_index} 页开始统计")
 
     # retrieve info of the video that was published between `src_timestamp` and `dst_timestamp`
     video_count_before:int = 0 # get_page_count()
     while True:
-        info_page, video_count_present = get_info(page_index, video_per_page)
+        info_page, video_count_present = get_info(page_index, video_zone, video_per_page)
         if video_count_present == -1:
             logging.error(f"Error when getting video info, page: {page_index}")
             time.sleep(40)
@@ -124,9 +137,9 @@ def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: s
                 all_video_info[video_aid] = video_info
         
         if any(is_video_before_src_time):
-            logging.info(f"page {page_index} has video published before {datetime.datetime.fromtimestamp(src_timestamp)}, and thus the task is finished")
+            logging.info(f"第 {page_index} 页有视频发布早于 {datetime.datetime.fromtimestamp(src_timestamp)}，任务结束")
             break
-        logging.info(f"page {page_index} is done, the pubtime of first/last video in this page is {datetime.datetime.fromtimestamp(info_page[0]['pubdate'])} / {datetime.datetime.fromtimestamp(info_page[-1]['pubdate'])}")
+        logging.info(f"第 {page_index} 页完成，本页最新/最早的视频发布于 {datetime.datetime.fromtimestamp(info_page[0]['pubdate'])} / {datetime.datetime.fromtimestamp(info_page[-1]['pubdate'])}")
         page_index += 1
         time.sleep(sleep_inteval + random.random())
     marshal.dump(all_video_info, open(os.path.join(data_path, video_info_file_name), "wb"))
@@ -165,7 +178,7 @@ async def get_comments(aid: int) -> List[Dict]:
         time.sleep(1)
     return reply_processer(comments)
 
-def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[set[int], set[int]]:
+def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[Set[int], Set[int]]:
     skipped_aid = set()
     if os.path.exists(os.path.join(data_path, "invalid_aid.pkl")): invalid_aid = marshal.load(open(os.path.join(data_path, "invalid_aid.pkl"), "rb"))
     else: invalid_aid = set()
@@ -175,10 +188,14 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force
     for n, video_info in enumerate(all_video_info.values()):
         video_aid = video_info['aid']
         
-        if video_info['copyright'] != 1: continue # only get comments of original video
+        if video_info['copyright'] != 1: continue # 只爬取原创视频
         video_comment_file_full_path = os.path.join(comment_data_folder, f"{video_aid}.json")
         if not force_update and os.path.exists(video_comment_file_full_path): continue
         if video_aid in invalid_aid: continue
+        if video_info["stat"]["reply"] == 0:
+            with open(video_comment_file_full_path, "w", encoding="utf-8") as f: f.write("[]")
+            logging.debug(f"av{video_aid} 似乎无评论，已跳过，进度 {n+1: 4} / {len(all_video_info)}")
+            continue
         
         try_times = 0
         continue_flag = False
@@ -227,7 +244,7 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force
         
         with open(video_comment_file_full_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(video_comments, ensure_ascii=False, indent=4))
-        logging.debug(f"Successfully retrieved comments of {video_aid}, comment count={len(video_comments)}, {n+1}/{len(all_video_info)}")
+        logging.debug(f"获取 av{video_aid} 评论成功，计评论数{len(video_comments): 4}, 进度 {n+1: 4} / {len(all_video_info)}")
     
     if len(invalid_aid)>0: marshal.dump(invalid_aid, open(os.path.join(data_path, "invalid_aid.pkl"), "wb"))
     return skipped_aid, invalid_aid
