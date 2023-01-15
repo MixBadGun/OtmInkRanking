@@ -15,7 +15,7 @@ delta_days = 10 # 以今天往前的第 delta_days 日开始统计
 range_days = 7 # 统计 range_days 天的数据
 base_path = "./AutoData/"   # 数据存储路径
 
-video_zones = [22]
+video_zones = [26, 126, 22]
 # 鬼畜: 119（不要用这个）; 音 MAD: 26; 人力: 126; 鬼调: 22
 # 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/video/video_zone.md
 
