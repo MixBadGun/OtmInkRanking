@@ -67,4 +67,6 @@ def pickData(mainArr):
                         continue
                     asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],reasons(pick["reason"]),pick["owner"]))
             shutil.move("./custom/pick.csv",f"./data/backup/pick_{usedTime}.csv")
+    if len(allArr) == 0:
+        os.remove('data/picked.csv')
     return allArr
