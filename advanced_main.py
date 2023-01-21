@@ -20,6 +20,12 @@ def real_len(letter):
         return 2
     else:
         return 1
+def passMn(text):
+    outsil = ""
+    for sil in text:
+        if unicodedata.category(sil) != "Mn":
+            outsil += sil
+    return outsil
 
 def all_len(text,maxlen):
     ink = 0
@@ -43,7 +49,7 @@ with open("custom/adjust.csv",encoding="utf-8-sig",newline='') as adjustfile:
     for adj in adjustInfo:
         adjust_dic[int(adj["uid"])] = adj["k"]
 
-co_header = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k']
+co_header = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k','o_title']
 logging.info('生成 TEditor CSV 表格')
 with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
     writer = csv.writer(csvfile)
@@ -70,13 +76,16 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(all_video_info[video]["stat"]["favorite"]),
             str(all_video_info[video]["pic"]),
             time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(all_video_info[video]["pubdate"]))),
-            str(normk)
+            str(normk),
+            str(all_video_info[video]["title"])
         ])
     vid_list.sort(key=lambda x:x[0],reverse=True)
     ranking = 0
     ranked_list = []
     for vid in vid_list:
         ranking += 1
+        # 过滤结合字符
+        vid[4] = passMn(vid[4])
         # 判断长度进行伸缩
         if (ranking <= main_end):
             allLength , shortRange = all_len(vid[4],main_max_title * 2)

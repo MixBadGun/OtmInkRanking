@@ -10,11 +10,12 @@ def MainVideo(aid,start_time,sep_time,ranking):
     # 获取模板文件
 
     mainStart = VideoFileClip("./template/main/back_come.mp4")
-    mainDuring = ImageClip("./template/main/back.png").set_duration(sep_time - 2.13333)
     mainEnd = VideoFileClip("./template/main/back_out.mp4")
+    mainDuration = mainStart.duration + mainEnd.duration
+    mainDuring = ImageClip("./template/main/back.png").set_duration(sep_time - mainDuration)
     main_back = concatenate_videoclips([mainStart,mainDuring,mainEnd]).resize(screensize)
     mainMaskStart = VideoFileClip("./template/main/vid_mask_come.mp4",has_mask=True).to_mask()
-    mainMaskDuring = ImageClip("./template/main/vid_mask.png").set_duration(sep_time - 2.13333).to_mask()
+    mainMaskDuring = ImageClip("./template/main/vid_mask.png").set_duration(sep_time - mainDuration).to_mask()
     mainMaskEnd = VideoFileClip("./template/main/vid_mask_out.mp4",has_mask=True).to_mask()
     main_mask = concatenate_videoclips([mainMaskStart,mainMaskDuring,mainMaskEnd],ismask=True)
 

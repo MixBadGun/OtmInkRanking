@@ -34,7 +34,7 @@ def pickData(mainArr):
             reason += charc
             max_n += real_len(charc)
         return reason
-    pickHeader = ["aid","bvid","cid","title","reason","uploader","pubtime","full_time"]
+    pickHeader = ["aid","bvid","cid","title","reason","uploader","pubtime","full_time","picker"]
 
     with open('data/picked.csv','w',encoding="utf-8-sig", newline='') as csvWrites:
         writer = csv.writer(csvWrites)
@@ -48,7 +48,7 @@ def pickData(mainArr):
                 uploader = owner
                 shutil.copy("./template/avatar/truck.png",f"./avatar/{picked['aid']}.png")
             timed = time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(picked["pubdate"])))
-            oneArr = [picked["aid"],picked["bvid"],picked["cid"],picked["title"],reason,uploader,timed,picked["duration"]]
+            oneArr = [picked["aid"],picked["bvid"],picked["cid"],picked["title"],reason,uploader,timed,picked["duration"],picked["picker"]]
             allArr.append(oneArr)
             writer.writerow(oneArr)
             logging.info("一个 Pick Up 作品已记录")
