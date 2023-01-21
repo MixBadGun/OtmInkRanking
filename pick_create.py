@@ -11,11 +11,12 @@ def PickVideo(aid,start_time,sep_time,picks):
     # 获取模板文件
 
     pickStart = VideoFileClip("./template/pick/pick_come.mp4")
-    pickDuring = ImageClip("./template/pick/pick_back.png").set_duration(sep_time - 2.133333)
     pickEnd = VideoFileClip("./template/pick/pick_out.mp4")
+    pickDuration = pickStart.duration + pickEnd.duration
+    pickDuring = ImageClip("./template/pick/pick_back.png").set_duration(sep_time - pickDuration)
     pick_back = concatenate_videoclips([pickStart,pickDuring,pickEnd]).resize(screensize)
     pickMaskStart = VideoFileClip("./template/pick/pick_mask_come.mp4",has_mask=True).to_mask()
-    pickMaskDuring = ImageClip("./template/pick/pick_mask.png").set_duration(sep_time - 2.133333).to_mask()
+    pickMaskDuring = ImageClip("./template/pick/pick_mask.png").set_duration(sep_time - pickDuration).to_mask()
     pickMaskEnd = VideoFileClip("./template/pick/pick_mask_out.mp4",has_mask=True).to_mask()
     pick_mask = concatenate_videoclips([pickMaskStart,pickMaskDuring,pickMaskEnd],ismask=True)
 
