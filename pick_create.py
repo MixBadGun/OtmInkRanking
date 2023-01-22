@@ -24,7 +24,7 @@ def PickVideo(aid,start_time,sep_time,picks):
 
     coverImage = ImageClip("./output_image/pick/PickRank_"+str(picks)+".png")
     coverImage = coverImage.set_duration(sep_time - 0.5)
-    coverImage = coverImage.crossfadein(0.5).crossfadeout(1.0)
+    coverImage = coverImage.crossfadein(0.25).crossfadeout(0.5)
     videoSource = VideoFileClip("./video/"+str(aid)+".mp4").fx(afx.audio_normalize)
     usingVideoSource = videoSource.subclip(start_time,start_time+sep_time)
     usingVideoSource = usingVideoSource.audio_fadein(1).audio_fadeout(1)
@@ -32,8 +32,8 @@ def PickVideo(aid,start_time,sep_time,picks):
     usingVideoSource = usingVideoSource.set_pos((557+1280/2-usingVideoSource.w/2,89+720/2-usingVideoSource.h/2))
     usingVideoSourceMasked = CompositeVideoClip([usingVideoSource],size=screensize).set_mask(pick_mask)
 
-    combinationVideo = CompositeVideoClip([pick_back,usingVideoSourceMasked,coverImage.set_start(0.5)])
-    combinationVideo.write_videofile('./output_clips/PickRank_'+str(picks)+".mp4")
+    combinationVideo = CompositeVideoClip([pick_back,usingVideoSourceMasked,coverImage.set_start(0.75)])
+    combinationVideo.write_videofile('./output_clips/PickRank_'+str(picks)+".mp4",fps=60,bitrate='10000k',audio_bitrate='3000k')
 
     for l in [pickStart,pickDuring,pickEnd,pick_back,pickMaskStart,pickMaskDuring,pickMaskEnd,pick_mask,coverImage,videoSource,usingVideoSource,usingVideoSourceMasked,combinationVideo]:
         l.close()

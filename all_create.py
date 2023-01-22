@@ -32,12 +32,17 @@ def AllVideo(main_end,pickArr,usedTime):
         for clipsto in range(1,len(pickArr)):
             AllArr.append(VideoMusicOffset(VideoFileClip(f"./output_clips/PickRank_{clipsto}.mp4")))
             AllArr.append(VideoFileClip("./template/pass/pass.mp4"))
+    if os.path.exists("./custom/canbin.mp4"):
         if len(pickArr) != 0:
             AllArr.append(VideoMusicOffset(VideoFileClip(f"./output_clips/PickRank_{len(pickArr)}.mp4")).fadeout(0.5))
-    if os.path.exists("./custom/canbin.mp4"):
+        else:
+            AllArr[-1] = AllArr[-1].fadeout(0.5)
         AllArr.append(VideoFileClip("./template/pass/passCanbin.mp4").fadein(0.5).fadeout(0.5))
         AllArr.append(VideoFileClip("./custom/canbin.mp4").fadein(0.5).fadeout(0.5))
-    AllArr.append(VideoFileClip("./template/pass/passSide.mp4").fadein(0.5))
+        AllArr.append(VideoFileClip("./template/pass/passSide.mp4").fadein(0.5))
+    else:
+        AllArr.append(VideoMusicOffset(VideoFileClip(f"./output_clips/PickRank_{len(pickArr)}.mp4")))
+        AllArr.append(VideoFileClip("./template/pass/passSide.mp4"))
     AllArr.append(VideoFileClip("./output_clips/SideRank.mp4"))
     combVideo = concatenate_videoclips(AllArr)
     combVideo.write_videofile(f'./output_all/Rank_{usedTime}.mp4')
