@@ -39,7 +39,7 @@ def pickData(mainArr):
     with open('data/picked.csv','w',encoding="utf-8-sig", newline='') as csvWrites:
         writer = csv.writer(csvWrites)
         writer.writerow(pickHeader)
-        async def getInfo(aid,reason,owner):
+        async def getInfo(aid,reason,owner,picker):
             pickAllInfo = video.Video(aid=int(aid))
             picked = await pickAllInfo.get_info()
             if owner == None or owner == "": # 判断是否指定了作者
@@ -48,7 +48,7 @@ def pickData(mainArr):
                 uploader = owner
                 shutil.copy("./template/avatar/truck.png",f"./avatar/{picked['aid']}.png")
             timed = time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(picked["pubdate"])))
-            oneArr = [picked["aid"],picked["bvid"],picked["cid"],picked["title"],reason,uploader,timed,picked["duration"],picked["picker"]]
+            oneArr = [picked["aid"],picked["bvid"],picked["cid"],picked["title"],reason,uploader,timed,picked["duration"],picker]
             allArr.append(oneArr)
             writer.writerow(oneArr)
             logging.info("一个 Pick Up 作品已记录")
@@ -65,7 +65,7 @@ def pickData(mainArr):
                 for pick in pickInfo:
                     if str(pick["aid"]) in mainArr: # 判断主榜是否已经存在 Pick Up 作品
                         continue
-                    asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],reasons(pick["reason"]),pick["owner"]))
+                    asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],reasons(pick["reason"]),pick["owner"],pick["picker"]))
             shutil.move("./custom/pick.csv",f"./data/backup/pick_{usedTime}.csv")
     if len(allArr) == 0:
         os.remove('data/picked.csv')
