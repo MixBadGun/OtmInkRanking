@@ -17,9 +17,9 @@ def AllVideo(main_end,pickArr,usedTime):
         for ads in files:
             AllArr.append(VideoFileClip(f"./custom/ads/{ads}").fadein(0.5).fadeout(0.5))
         if len(files) > 0:
-            AllArr.append(VideoFileClip("./output_clips/Opening.mp4").fadein(0.5))
+            AllArr.append(VideoMusicOffset(VideoFileClip("./output_clips/Opening.mp4").fadein(0.5)))
         else:
-            AllArr.append(VideoFileClip("./output_clips/Opening.mp4"))
+            AllArr.append(VideoMusicOffset(VideoFileClip("./output_clips/Opening.mp4")))
     filePath = f"./output_clips/{usedTime}"
     os.mkdir(filePath)
     AllArr.append(VideoFileClip("./template/pass/passMain.mp4"))
@@ -45,7 +45,7 @@ def AllVideo(main_end,pickArr,usedTime):
         AllArr.append(VideoFileClip("./template/pass/passSide.mp4"))
     AllArr.append(VideoFileClip("./output_clips/SideRank.mp4"))
     combVideo = concatenate_videoclips(AllArr)
-    combVideo.write_videofile(f'./output_all/Rank_{usedTime}.mp4')
+    combVideo.write_videofile(f'./output_all/Rank_{usedTime}.mp4',fps=60,bitrate='10000k',audio_bitrate='3000k')
     for l in AllArr:
         l.close()
     if os.path.exists("./custom/canbin.mp4"):
