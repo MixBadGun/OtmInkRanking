@@ -126,7 +126,6 @@ with open(f"./custom/picked/{usedTime}-picked.csv",'w',encoding="utf-8-sig", new
                 if str(pick["aid"]) in mainArr: # 判断主榜是否已经存在 Pick Up 作品
                     continue
                 asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],reasons(pick["reason"]),pick["owner"],pick["picker"]))
-        shutil.move("./custom/pick.csv",f"./data/backup/pick_{usedTime}.csv")
 if len(allArr) == 0:
     os.remove(f"./custom/picked/{usedTime}-picked.csv")
 
