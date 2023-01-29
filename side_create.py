@@ -22,7 +22,7 @@ def SideVideo(main_end,side_end,side_count):
     sideDur = sideBGM.duration / int(side_end / side_count)
     sideArr = []
     for fournum in range(main_end+1,main_end+side_end+1,4):
-        sidePic = ImageClip(f"./output_image/side/SideRank_{fournum}-{fournum+side_count-1}.png").set_duration(sideDur)
+        sidePic = ImageClip(f"./custom/output_image/side/SideRank_{fournum}-{fournum+side_count-1}.png").set_duration(sideDur)
         sidePic = sidePic.crossfadein(0.25).crossfadeout(0.25)
         sideArr.append(sidePic)
     sideAllPic = concatenate_videoclips(sideArr)

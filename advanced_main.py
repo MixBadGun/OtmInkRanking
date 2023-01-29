@@ -62,7 +62,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             normk = float(adjust_dic[all_video_info[video]["owner"]["mid"]])
         else:
             normk = 1
-        norm_score = '%.2f' % (aid_to_score_norm[all_video_info[video]["aid"]] * normk)
+        norm_score = '%.3f' % (aid_to_score_norm[all_video_info[video]["aid"]] * normk)
         vid_list.append([
             norm_score,
             str(all_video_info[video]["aid"]),

@@ -29,7 +29,7 @@ target_bad_key_words = ["加油","注意","建议","进步","稚嫩","不足","�
                         "文艺复兴","倒退","大势所趋","dssq","烂"]
 
 # 改动这个筛选条件之后，需要先把 AutoData/这次的数据/comment_data/ 和 AutoData/这次的数据/invalid_aid.pkl 删掉
-tag_whitelist = ['音MAD']
+tag_whitelist = ['音MAD','音mad']
 tag_whitezone = [26]
 whitelist_filter = lambda video_info, tags: (video_info['tid'] in tag_whitezone) or (len(set(tags).intersection(tag_whitelist))>0)
 

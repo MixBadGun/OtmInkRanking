@@ -21,7 +21,7 @@ def MainVideo(aid,start_time,sep_time,ranking):
 
     # 获取视频文件
 
-    coverImage = ImageClip("./output_image/main/MainRank_"+str(ranking)+".png")
+    coverImage = ImageClip("./custom/output_image/main/MainRank_"+str(ranking)+".png")
     coverImage = coverImage.set_duration(sep_time - 0.75)
     coverImage = coverImage.crossfadein(0.25).crossfadeout(0.5)
     videoSource = VideoFileClip("./video/"+str(aid)+".mp4").fx(afx.audio_normalize)

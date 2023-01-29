@@ -14,9 +14,12 @@ def VideoMusicOffset(video):
 def AllVideo(main_end,pickArr,usedTime):
     AllArr = []
     for curDir, dirs, files in os.walk("./custom/ads"):
+        trueFiles = []
         for ads in files:
-            AllArr.append(VideoFileClip(f"./custom/ads/{ads}").fadein(0.5).fadeout(0.5))
-        if len(files) > 0:
+            if ads[0:8] == usedTime:
+                AllArr.append(VideoFileClip(f"./custom/ads/{ads}").fadein(0.5).fadeout(0.5))
+                trueFiles.append(ads)
+        if len(trueFiles) > 0:
             AllArr.append(VideoMusicOffset(VideoFileClip("./output_clips/Opening.mp4").fadein(0.5)))
         else:
             AllArr.append(VideoMusicOffset(VideoFileClip("./output_clips/Opening.mp4")))
