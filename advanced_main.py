@@ -62,7 +62,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             normk = float(adjust_dic[all_video_info[video]["owner"]["mid"]])
         else:
             normk = 1
-        norm_score = '%.3f' % (aid_to_score_norm[all_video_info[video]["aid"]] * normk)
+        norm_score = float('%.3f' % (aid_to_score_norm[all_video_info[video]["aid"]] * normk))
         vid_list.append([
             norm_score,
             str(all_video_info[video]["aid"]),
@@ -79,7 +79,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(normk),
             str(all_video_info[video]["title"])
         ])
-    vid_list.sort(key=lambda x:x[0],reverse=True)
+    vid_list = sorted(vid_list,key=lambda x:x[0],reverse=True)
     ranking = 0
     ranked_list = []
     for vid in vid_list:
