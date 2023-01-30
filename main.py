@@ -81,15 +81,14 @@ for ig in ranked_list:
 #     ranking += 1
 
 # 视频下载
-
-if os.path.exists(f"./cookies/cookie.txt"):
-    cookir = "-c ./cookies/cookie.txt"
-else:
-    cookir = ""
 def getVideo(aid):
+    command = ["./lux"]
+    if os.path.exists(f"./cookies/cookie.txt"):
+        command.append("-c")
+        command.append("./cookies/cookie.txt")
     if os.path.exists(f"./video/{aid}.mp4"):
         return
-    subprocess.Popen(f'./lux {cookir} -o ./video -O {aid} av{aid}').wait()
+    subprocess.Popen(command + ["-o","./video","-O",aid,f"av{aid}"]).wait()
 
 # 快速导航导出
 
