@@ -19,6 +19,13 @@ logger = logging.getLogger()
 logger.addHandler(console_handler)
 import danmuku_time
 
+# 新建文件夹
+
+dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","output_image","video","cookies"]
+for dirpath in dirpaths:
+    if not os.path.exists(dirpath):
+        os.mkdir(dirpath)
+
 # 精确视频长度
 
 def exactVideoLength(aid):
@@ -75,10 +82,14 @@ for ig in ranked_list:
 
 # 视频下载
 
+if os.path.exists(f"./cookies/cookie.txt"):
+    cookir = "-c ./cookies/cookie.txt"
+else:
+    cookir = ""
 def getVideo(aid):
     if os.path.exists(f"./video/{aid}.mp4"):
         return
-    subprocess.Popen(f'./lux -c ./cookies/cookie.txt -o ./video -O {aid} av{aid}').wait()
+    subprocess.Popen(f'./lux {cookir} -o ./video -O {aid} av{aid}').wait()
 
 # 快速导航导出
 

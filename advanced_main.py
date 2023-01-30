@@ -8,7 +8,7 @@ from auto_pipeline import all_video_info , aid_to_score_norm
 
 # 新建文件夹
 
-dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","output_image","video"]
+dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","output_image","video","cookies"]
 for dirpath in dirpaths:
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
