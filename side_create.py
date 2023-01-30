@@ -1,4 +1,3 @@
-from math import floor
 from moviepy.editor import *
 # 变量声明
 

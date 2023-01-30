@@ -1,6 +1,5 @@
 import logging
 from os import sep
-from turtle import bgcolor
 from moviepy.editor import *
 from config import *
 # 变量声明

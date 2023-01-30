@@ -1,5 +1,4 @@
 import logging
-from os import sep
 from moviepy.editor import *
 from config import *
 # 变量声明
@@ -32,7 +31,7 @@ def MainVideo(aid,start_time,sep_time,ranking):
     usingVideoSourceMasked = CompositeVideoClip([usingVideoSource],size=screensize).set_mask(main_mask)
 
     combinationVideo = CompositeVideoClip([main_back,usingVideoSourceMasked,coverImage.set_start(0.75)])
-    combinationVideo.write_videofile('./output_clips/MainRank_'+str(ranking)+".mp4",fps=60,bitrate='10000k',audio_bitrate='3000k')
+    combinationVideo.write_videofile('./output_clips/MainRank_'+str(ranking)+".mp4",fps=60,bitrate='10000k',audio_bitrate='3000k',codec="nvenc")
 
     for l in [mainStart,mainDuring,mainEnd,main_back,mainMaskStart,mainMaskDuring,mainMaskEnd,main_mask,coverImage,videoSource,usingVideoSource,usingVideoSourceMasked,combinationVideo]:
         l.close()
