@@ -16,6 +16,12 @@ for dirpath in dirpaths:
 # 字符长度判断
 
 def real_len(letter):
+    widLetter = "ABCDEFGHJKLMNOPQRSTUVWXYZm"
+    NarrowLetter = "Iijl()[].;:!\'\"`{}"
+    if letter in widLetter:
+        return 1.5
+    if letter in NarrowLetter:
+        return 0.5
     if (unicodedata.east_asian_width(letter) in ('F','W','A')):
         return 2
     else:
