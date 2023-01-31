@@ -14,7 +14,8 @@ import git
 
 from config import *
 
-repo = git.Repo.init(path='./custom')
+# repo = git.Repo.init(path='./custom')
+
 # 获取数据
 ranked_list = []
 datafile = open("custom/data.csv","r",encoding="utf-8-sig")
@@ -113,12 +114,18 @@ with open(f"./custom/picked/{usedTime}-picked.csv",'w',encoding="utf-8-sig", new
         writer.writerow(oneArr)
         logging.info("一个 Pick Up 作品已记录")
         # 下载头像
-        face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(picked["aid"])).json()["data"]["owner"]["face"]
         if os.path.exists("avatar/"+ str(picked["aid"]) + ".png"):
             pass
         else:
-            with open("avatar/"+ str(picked["aid"]) + ".png", "wb") as f:
-                f.write(requests.get(url=face).content)
+            face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(picked["aid"])).json()["data"]["owner"]["face"]
+            if(face.split(".")[-1] in staticFormat): # 判断静态图片
+                with open("avatar/"+ str(picked["aid"]) + ".png", "wb") as f:
+                    f.write(requests.get(url=face).content)
+            else:
+                tempImage = f"avatar/{picked['aid']}.{face.split('.')[-1]}"
+                with open(tempImage, "wb") as f:
+                    f.write(requests.get(url=face).content)
+                    Image.open(tempImage).save("avatar/"+ str(picked['aid']) + ".png")
     if os.path.exists("./custom/pick.csv"):
         with open("custom/pick.csv",encoding="utf-8-sig",newline='') as csvfile:
             pickInfo = csv.DictReader(csvfile)
@@ -151,8 +158,15 @@ if os.path.exists(f"./custom/picked/{usedTime}-picked.csv"):
     subprocess.Popen(f'start /wait TEditor.exe batchgen -i "template/pick.ted" -d "custom/picked/{usedTime}-picked.csv" ' + '-o "custom/output_image/pick" -n "PickRank_{index}" -s 1 -e '+ str(len(allArr)),shell=True).wait()
     logging.info('Pick Up 图片合成完毕')
 
+# 图片转换
+
+for curDir, dirs, files in os.walk("./custom/output_image/"):
+    for file in files:
+        usingpath = f"{curDir}/{file}"
+        Image.open(usingpath).save(usingpath)
+
 # 上载到 GitHub
-repo.index.add(items="*")
-repo.index.commit("new files")
-remote = repo.remote()
-remote.push()
+# repo.index.add(items="*")
+# repo.index.commit("new files")
+# remote = repo.remote(name='github')
+# remote.push()
