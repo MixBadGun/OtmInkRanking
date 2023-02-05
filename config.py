@@ -1,12 +1,14 @@
 import time
 import os
 import threading
+
 if os.path.exists("./custom/time.txt"):
     usedTime = str(open("./custom/time.txt","r").read())
 else:
     usedTime = time.strftime("%Y%m%d", time.localtime())
     with open("./custom/time.txt","w") as f:
         f.write(usedTime)
+
 main_max_title = 30
 side_max_title = 23
 pick_max_reason = 40
@@ -16,4 +18,12 @@ side_end = 40 # 副榜个数
 side_count = 4 # 副榜显示
 staticFormat = ["png","jpg","jpeg"]
 
-muitl_limit = threading.Semaphore(5)
+render_format = {
+    "vcodec": "h264_nvenc", # 若没有 CUDA 加速，请切换为其它编码器或直接注释本行。
+    "video_bitrate" : "10000k",
+    "audio_bitrate" : "320k"
+}
+read_format = {
+    "vcodec": "h264_cuvid" # 若没有 CUDA 加速，请切换为其它编码器或直接注释本行。
+}
+muitl_limit = threading.Semaphore(3)

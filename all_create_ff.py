@@ -2,29 +2,30 @@ from moviepy.editor import *
 import os
 import shutil
 import ffmpeg
+from config import *
 
 # 变量声明
 def ffVideo(file):
-    vi = ffmpeg.input(file)
+    vi = ffmpeg.input(file,**read_format)
     viv = vi.video
     aud = vi.audio
     return [viv,aud]
 
 def inVideo(file):
-    vi = ffmpeg.input(file)
+    vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",st=0,d=0.5,alpha=1).video
     aud = vi.audio
     return [viv,aud]
 
 def inoutVideo(file):
-    vi = ffmpeg.input(file)
+    vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",st=0,d=0.5,alpha=1).video
     viv = viv.filter("fade",t="out",st="d-0.5",d=0.5,alpha=1)
     aud = vi.audio
     return [viv,aud]
 
 def outVideo(file):
-    vi = ffmpeg.input(file)
+    vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",t="out",st="d-0.5",d=0.5,alpha=1)
     aud = vi.audio
     return [viv,aud]
@@ -75,7 +76,7 @@ def AllVideo(main_end,pickArr,usedTime):
             combVideo = items
             continue
         combVideo = ffmpeg.concat(combVideo[0],combVideo[1],items[0],items[1],v=1,a=1).node
-    ffmpeg.output(combVideo[0],combVideo[1],f'./output_all/Rank_{usedTime}.mp4',vcodec="h264_nvenc",acodec='aac',video_bitrate="10000k",audio_bitrate="320k").run()
+    ffmpeg.output(combVideo[0],combVideo[1],f'./output_all/Rank_{usedTime}.mp4',**render_format).run()
     if os.path.exists("./custom/canbin.mp4"):
         shutil.move("./custom/canbin.mp4",f"{filePath}/canbin_{usedTime}.mp4")
     shutil.move("./output_clips/Opening.mp4",f"{filePath}/Opening.mp4")

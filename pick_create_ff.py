@@ -4,14 +4,14 @@ from config import *
 def PickVideo(aid,start_time,sep_time,picks):
     # 获取模板文件
 
-    pickStart = ffmpeg.input("./template/pick/pick_come.mp4",vcodec="h264_cuvid")
-    pickEnd = ffmpeg.input("./template/pick/pick_out.mp4",vcodec="h264_cuvid")
+    pickStart = ffmpeg.input("./template/pick/pick_come.mp4",**read_format)
+    pickEnd = ffmpeg.input("./template/pick/pick_out.mp4",**read_format)
     pickDuration = float(ffmpeg.probe("./template/pick/pick_come.mp4")["streams"][0]["duration"]) + float(ffmpeg.probe("./template/pick/pick_out.mp4")["streams"][0]["duration"])
     pickDuring = ffmpeg.input("./template/pick/pick_back.png",t=sep_time - pickDuration,loop=1,framerate=60)
     pick_back = ffmpeg.concat(pickStart,pickDuring,pickEnd)
-    pickMaskStart = ffmpeg.input("./template/pick/pick_mask_come.mp4",vcodec="h264_cuvid")
+    pickMaskStart = ffmpeg.input("./template/pick/pick_mask_come.mp4",**read_format)
     pickMaskDuring = ffmpeg.input("./template/pick/pick_mask.png",t=sep_time - pickDuration,loop=1,framerate=60)
-    pickMaskEnd = ffmpeg.input("./template/pick/pick_mask_out.mp4",vcodec="h264_cuvid")
+    pickMaskEnd = ffmpeg.input("./template/pick/pick_mask_out.mp4",**read_format)
     pick_mask = ffmpeg.concat(pickMaskStart,pickMaskDuring,pickMaskEnd)
 
     # 获取视频文件
@@ -30,6 +30,6 @@ def PickVideo(aid,start_time,sep_time,picks):
 
     combinationVideo = ffmpeg.filter([pick_back,usingVideoSourceMasked],"overlay")
     combinationVideo = ffmpeg.filter([combinationVideo,coverImage],"overlay")
-    ffmpeg.output(combinationVideo,videoSourceAudio,f'./output_clips/PickRank_{picks}.mp4',vcodec="h264_nvenc",video_bitrate="10000k",audio_bitrate="320k").run()
+    ffmpeg.output(combinationVideo,videoSourceAudio,f'./output_clips/PickRank_{picks}.mp4',**render_format).run()
 
     muitl_limit.release()

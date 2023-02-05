@@ -4,14 +4,14 @@ import ffmpeg
 def MainVideo(aid,start_time,sep_time,ranking):
     # 获取模板文件
 
-    mainStart = ffmpeg.input("./template/main/back_come.mp4",vcodec="h264_cuvid")
-    mainEnd = ffmpeg.input("./template/main/back_out.mp4",vcodec="h264_cuvid")
+    mainStart = ffmpeg.input("./template/main/back_come.mp4",**read_format)
+    mainEnd = ffmpeg.input("./template/main/back_out.mp4",**read_format)
     mainDuration = float(ffmpeg.probe("./template/main/back_come.mp4")["streams"][0]["duration"]) + float(ffmpeg.probe("./template/main/back_out.mp4")["streams"][0]["duration"])
     mainDuring = ffmpeg.input("./template/main/back.png",t=sep_time - mainDuration,loop=1,framerate=60)
     main_back = ffmpeg.concat(mainStart,mainDuring,mainEnd)
-    mainMaskStart = ffmpeg.input("./template/main/vid_mask_come.mp4",vcodec="h264_cuvid")
+    mainMaskStart = ffmpeg.input("./template/main/vid_mask_come.mp4",**read_format)
     mainMaskDuring = ffmpeg.input("./template/main/vid_mask.png",t=sep_time - mainDuration,loop=1,framerate=60)
-    mainMaskEnd = ffmpeg.input("./template/main/vid_mask_out.mp4",vcodec="h264_cuvid")
+    mainMaskEnd = ffmpeg.input("./template/main/vid_mask_out.mp4",**read_format)
     main_mask = ffmpeg.concat(mainMaskStart,mainMaskDuring,mainMaskEnd)
 
     # 获取视频文件
@@ -30,6 +30,6 @@ def MainVideo(aid,start_time,sep_time,ranking):
 
     combinationVideo = ffmpeg.filter([main_back,usingVideoSourceMasked],"overlay")
     combinationVideo = ffmpeg.filter([combinationVideo,coverImage],"overlay")
-    ffmpeg.output(combinationVideo,videoSourceAudio,'./output_clips/MainRank_'+str(ranking)+".mp4",vcodec="h264_nvenc",video_bitrate="10000k",audio_bitrate="320k").run()
+    ffmpeg.output(combinationVideo,videoSourceAudio,'./output_clips/MainRank_'+str(ranking)+".mp4",**render_format).run()
 
     muitl_limit.release()

@@ -1,5 +1,6 @@
 import ffmpeg
 import datetime
+from config import *
 
 delta_days = 10
 DisplayFont = './fonts/HarmonyOS_Sans_SC_Medium.ttf'
@@ -14,4 +15,4 @@ def OpeningVideo(usedTime):
     dst_time = src_time + datetime.timedelta(days=7) # 7天
     timeText = src_time.strftime('%Y/%m/%d') + " - " + dst_time.strftime('%Y/%m/%d')
     vi = ffmpeg.filter(vi,"drawtext",fontfile=DisplayFont,text=timeText,fontsize=48,fontcolor='white',x="1784-text_w",y=748,enable='between(t,12.12,17.12)')
-    ffmpeg.output(vi,au,"./output_clips/Opening.mp4",vcodec="h264_nvenc",video_bitrate="10000k",audio_bitrate="320k").run()
+    ffmpeg.output(vi,au,"./output_clips/Opening.mp4",**render_format).run()
