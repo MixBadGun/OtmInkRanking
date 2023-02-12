@@ -19,6 +19,7 @@ side_count = 4 # 副榜显示
 staticFormat = ["png","jpg","jpeg"]
 delta_days = 11 # 以今天往前的第 delta_days 日开始统计
 range_days = 7 # 统计 range_days 天的数据
+screenRatio = 16 / 9
 
 render_format = {
     "vcodec": "h264_nvenc", # 若没有 CUDA 加速，请切换为其它编码器或直接注释本行。
