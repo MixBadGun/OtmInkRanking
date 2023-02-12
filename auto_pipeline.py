@@ -6,13 +6,12 @@ import pickle
 import datetime
 import logging
 from collections import defaultdict
+from config import delta_days , range_days
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 
 from auto_pipeline_func import *
 
-str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期
-delta_days = 10 # 以今天往前的第 delta_days 日开始统计
-range_days = 7 # 统计 range_days 天的数据
+str_time = datetime.datetime.now().strftime('%y%m%d') # datetime.datetime.now().strftime('%y%m%d') # 今天日期
 base_path = "./AutoData/"   # 数据存储路径
 
 video_zones = [26, 126, 22]

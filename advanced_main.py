@@ -96,11 +96,11 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
         if (ranking <= main_end):
             allLength , shortRange = all_len(vid[4],main_max_title * 2)
             if (allLength > main_max_title * 2):
-                vid[4] = vid[4][0:shortRange - 1] + "..."
+                vid[4] = vid[4][0:shortRange - 2] + "..."
         elif (ranking <= main_end + side_end):
             allLength , shortRange = all_len(vid[4],side_max_title * 2)
             if (allLength > side_max_title * 2):
-                vid[4] = vid[4][0:shortRange - 1] + "..."
+                vid[4] = vid[4][0:shortRange - 2] + "..."
         # 简易start_time判断
         ranked_list.append([ranking] + vid)
     writer.writerows(ranked_list)
