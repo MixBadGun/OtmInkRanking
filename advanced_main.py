@@ -5,10 +5,10 @@ import os
 import unicodedata
 from config import *
 from auto_pipeline import all_video_info , aid_to_score_norm
-
+import shutil
 # 新建文件夹
 
-dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","custom/output_image","custom/output_image/main","custom/output_image/pick","custom/output_image/side","video","cookies"]
+dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","custom/output_image","custom/output_image/main","custom/output_image/pick","custom/output_image/side","video","cookies","fast_check","fast_check/source"]
 for dirpath in dirpaths:
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
@@ -104,3 +104,4 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
         # 简易start_time判断
         ranked_list.append([ranking] + vid)
     writer.writerows(ranked_list)
+shutil.copy("./custom/data.csv","./fast_check/source/data.csv")
