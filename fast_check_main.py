@@ -24,6 +24,7 @@ with open("./fast_check/source/pick_data.csv","r",encoding="utf-8-sig",newline='
     min_time = datetime.datetime.today() + datetime.timedelta(days=-10)
     with open("./fast_check/source/pick.csv","w",encoding="utf-8-sig",newline='') as csvwrite:
         writefile = csv.writer(csvwrite)
+        writefile.writerow(["aid","reason","picker","owner"])
         # PICK UP 获取
         for item in listed:
             time = item["提交时间（自动）"]
