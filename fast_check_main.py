@@ -36,7 +36,7 @@ with open("./fast_check/source/pick_data.csv","r",encoding="utf-8-sig",newline='
             if picker == "":
                 picker = "神秘人"
             owner = item["作品原作者（必填）"]
-            if owner == "无需作答":
+            if owner == "无须作答":
                 owner = ""
             url = f"https://www.bilibili.com/video/av{aid}"
             webbrowser.open(url, new=0, autoraise=True)
@@ -67,6 +67,6 @@ with open("./fast_check/source/pick_data.csv","r",encoding="utf-8-sig",newline='
         yesButton = tkinter.Button(text="确定",font=("HarmonyOS Sans SC",10),command = lambda: overCommand(top))
         yesButton.pack()
         top.mainloop()
-shutil.copy("./fast_check/ed.mp4","./custom/ed.mp4")
-shutil.copy("./fast_check/source/pick.csv","./custom/pick.csv")
+shutil.move("./fast_check/ed.mp4","./custom/ed.mp4")
+shutil.move("./fast_check/source/pick.csv","./custom/pick.csv")
 os.system("python second_main.py")
