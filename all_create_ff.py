@@ -85,4 +85,5 @@ def AllVideo(main_end,pickArr,usedTime):
     for clipsto in range(1,len(pickArr)+1):
         shutil.move(f"./output_clips/PickRank_{clipsto}.mp4",f"{filePath}/PickRank_{clipsto}.mp4")
     shutil.move("./output_clips/SideRank.mp4",f"{filePath}/SideRank.mp4")
+    os.remove("./custom/ed.mp4")
     os.remove("./custom/time.txt")
