@@ -5,7 +5,7 @@ import ffmpeg
 from config import *
 
 def duration(file,offset):
-    return '%.2f' % (float(ffmpeg.probe(file)["streams"][0]["duration"]) + offset)
+    return float(ffmpeg.probe(file)["streams"][0]["duration"]) + offset
 
 def ffVideo(file):
     vi = ffmpeg.input(file,**read_format)
@@ -15,13 +15,13 @@ def ffVideo(file):
 
 def inVideo(file):
     vi = ffmpeg.input(file,**read_format)
-    viv = vi.filter("fade",st=0,d=0.5,alpha=1).video
+    viv = vi.filter("fade",st=0,d=0.5,alpha=1)
     aud = vi.audio
     return [viv,aud]
 
 def inoutVideo(file):
     vi = ffmpeg.input(file,**read_format)
-    viv = vi.filter("fade",st=0,d=0.5,alpha=1).video
+    viv = vi.filter("fade",st=0,d=0.5,alpha=1)
     viv = viv.filter("fade",t="out",st=duration(file,-0.5),d=0.5,alpha=1)
     aud = vi.audio
     return [viv,aud]
