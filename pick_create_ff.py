@@ -22,7 +22,7 @@ def PickVideo(aid,start_time,sep_time,picks):
     videoSource = ffmpeg.input(f"./video/{aid}.mp4",ss=start_time,t=sep_time)
     videoSourceSize = ffmpeg.probe(f"./video/{aid}.mp4")["streams"][0]
     videoRatio = videoSourceSize["width"] / videoSourceSize["height"]
-    backImage = ffmpeg.input("./template/pick/pick_back.png",t=sep_time,loop=1,framerate=60)
+    backImage = ffmpeg.input("./template/pick/back_inner.png",t=sep_time,loop=1,framerate=60)
     videoSourceAudio = ffmpeg.filter(videoSource.audio,"afade",t="in",d=1)
     videoSourceAudio = ffmpeg.filter(videoSourceAudio,"afade",t="out",st=sep_time-1,d=1)
     usingVideoSource = ffmpeg.filter(videoSource.video,"framerate",fps=60)
