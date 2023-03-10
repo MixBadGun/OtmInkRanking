@@ -4,7 +4,9 @@ import shutil
 import ffmpeg
 from config import *
 
-# 变量声明
+def duration(file):
+    return float(ffmpeg.probe(file)["streams"][0]["duration"])
+
 def ffVideo(file):
     vi = ffmpeg.input(file,**read_format)
     viv = vi.video
@@ -20,13 +22,13 @@ def inVideo(file):
 def inoutVideo(file):
     vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",st=0,d=0.5,alpha=1).video
-    viv = viv.filter("fade",t="out",st="d-0.5",d=0.5,alpha=1)
+    viv = viv.filter("fade",t="out",st=duration(file)-0.5,d=0.5,alpha=1)
     aud = vi.audio
     return [viv,aud]
 
 def outVideo(file):
     vi = ffmpeg.input(file,**read_format)
-    viv = vi.filter("fade",t="out",st="d-0.5",d=0.5,alpha=1)
+    viv = vi.filter("fade",t="out",st=duration(file)-0.5,d=0.5,alpha=1)
     aud = vi.audio
     return [viv,aud]
 
