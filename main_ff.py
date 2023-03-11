@@ -10,6 +10,7 @@ from side_create_ff import SideVideo
 from pick_create_ff import PickVideo
 from all_create_ff import AllVideo
 from opening_create_ff import OpeningVideo
+from video_create_ff_main_to_side import MainToSideVideo
 logging.basicConfig(format='[%(levelname)s]\t%(message)s',filename="log/" + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', level=logging.DEBUG)
 formatter = logging.Formatter('[%(levelname)s]\t%(message)s')
 console_handler = logging.StreamHandler()
@@ -21,7 +22,7 @@ import danmuku_time
 
 # 新建文件夹
 
-dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","output_image","video","cookies"]
+dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","video","cookies"]
 for dirpath in dirpaths:
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
@@ -89,6 +90,15 @@ for viding in ranked_list:
     cid = viding[4]
     getVideo(aid)
     full_time = exactVideoLength(aid)
+    if ranking == 1:
+        # 副榜段落合成
+        if os.path.exists("./output_clips/SideRank.mp4"):
+            pass
+        elif os.path.exists("./custom/ed.mp4"):
+            SideVideo(main_end,side_end,side_count)
+        else:
+            MainToSideVideo(aid,0,sep_time,1)
+            continue
     start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
     muitl_limit.acquire()
     single_render = threading.Thread(target=MainVideo,args=(aid,start_time,end_time,ranking))
@@ -97,11 +107,6 @@ for viding in ranked_list:
 for fg in muitl_render:
     fg.join()
 
-# 副榜段落合成
-if os.path.exists("./output_clips/SideRank.mp4"):
-    pass
-else:
-    SideVideo(main_end,side_end,side_count)
 
 # PICK UP 合成
 picks = 0

@@ -62,11 +62,12 @@ with open("./fast_check/source/pick_data.csv","r",encoding="utf-8-sig",newline='
         typeText = tkinter.Entry()
         typeText.pack()
         def overCommand(root):
-            getVideo(turnAid(typeText.get()))
+            if typeText.get() != "":
+                getVideo(turnAid(typeText.get()))
+                shutil.move("./fast_check/ed.mp4","./custom/ed.mp4")
             root.destroy()
         yesButton = tkinter.Button(text="确定",font=("HarmonyOS Sans SC",10),command = lambda: overCommand(top))
         yesButton.pack()
         top.mainloop()
-shutil.move("./fast_check/ed.mp4","./custom/ed.mp4")
 shutil.move("./fast_check/source/pick.csv","./custom/pick.csv")
 os.system("python second_main.py")
