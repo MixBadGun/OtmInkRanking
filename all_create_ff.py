@@ -49,6 +49,11 @@ def AllVideo(main_end,pickArr,usedTime):
         os.mkdir(filePath)
     AllArr.append(ffVideo("./template/pass/passMain.mp4"))
 
+    for clips in range(main_end,6,-1):
+        AllArr.append(ffVideo(f"./output_clips/MainRank_{clips}.mp4"))
+        AllArr.append(ffVideo("./template/pass/pass.mp4"))
+    AllArr.append(ffVideo("./output_clips/MainRank_5.mp4"))
+
     # Pick Up
 
     if pickArr != []:
@@ -68,7 +73,9 @@ def AllVideo(main_end,pickArr,usedTime):
     else:
         if pickArr != []:
             AllArr.append(ffVideo(f"./output_clips/PickRank_{len(pickArr)}.mp4"))
-        AllArr.append(ffVideo("./template/pass/passMain.mp4"))
+            AllArr.append(ffVideo("./template/pass/passMain.mp4"))
+        else:
+            AllArr.append(ffVideo("./template/pass/pass.mp4"))
 
     # 倒数五位主榜
 
