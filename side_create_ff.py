@@ -25,5 +25,3 @@ def SideVideo(main_end,side_end,side_count):
     sideVideo = ffmpeg.overlay(sideVideo,sideBGM,x=1373,y=780)
     sideVideo = ffmpeg.overlay(sideVideo,sideAll)
     ffmpeg.output(sideVideo,sideBGMAudio,"./output_clips/SideRank.mp4",**render_format).run()
-
-SideVideo(main_end,side_end,side_count)
