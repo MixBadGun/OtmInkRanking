@@ -20,8 +20,10 @@ def SideVideo(main_end,side_end,side_count):
             sideAll = sidePic
             continue
         sideAll = ffmpeg.concat(sideAll,sidePic)
-    sideVideo = ffmpeg.overlay(sideBack,sideStaff,x="1598-w/2",y=f"740-((h+740)/{sideDuration})*t")
+    sideVideo = ffmpeg.overlay(sideBack,sideStaff,x="1598-w/2",y=f"740-((h+740)/{sideDuration})*t",format="yuv444")
     sideVideo = ffmpeg.overlay(sideVideo,sideCover,x="W-w",y="H-h")
     sideVideo = ffmpeg.overlay(sideVideo,sideBGM,x=1373,y=780)
     sideVideo = ffmpeg.overlay(sideVideo,sideAll)
     ffmpeg.output(sideVideo,sideBGMAudio,"./output_clips/SideRank.mp4",**render_format).run()
+
+SideVideo(main_end,side_end,side_count)
