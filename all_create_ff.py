@@ -52,7 +52,7 @@ def AllVideo(main_end,pickArr,usedTime):
     for clips in range(main_end,6,-1):
         AllArr.append(ffVideo(f"./output_clips/MainRank_{clips}.mp4"))
         AllArr.append(ffVideo("./template/pass/pass.mp4"))
-    AllArr.append(ffVideo("./output_clips/MainRank_5.mp4"))
+    AllArr.append(ffVideo("./output_clips/MainRank_6.mp4"))
 
     # Pick Up
 
