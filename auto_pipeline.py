@@ -1,17 +1,16 @@
 import json
 import os
-from typing import List,Tuple,Dict,Union,Optional,Any
+from typing import List, Tuple, Dict, Union, Any
 import marshal
-import pickle
 import datetime
 import logging
 from collections import defaultdict
-from config import delta_days , range_days
+from config import delta_days, range_days
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 
 from auto_pipeline_func import *
 
-str_time = datetime.datetime.now().strftime('%y%m%d') # datetime.datetime.now().strftime('%y%m%d') # 今天日期
+str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期
 base_path = "./AutoData/"   # 数据存储路径
 
 video_zones = [26, 126, 22]
@@ -33,11 +32,13 @@ tag_whitezone = [26]
 whitelist_filter = lambda video_info, tags: (video_info['tid'] in tag_whitezone) or (len(set(tags).intersection(tag_whitelist))>0)
 
 if not os.path.exists(base_path): os.makedirs(base_path)
-str_time = datetime.datetime.strptime(str_time,"%y%m%d")
-src_time = str_time + datetime.timedelta(days=-delta_days)
-dst_time = src_time + datetime.timedelta(days=range_days)
-logging.info(f"选取日期 从 {src_time.strftime('%y/%m/%d-%H:%m')} 到 {dst_time.strftime('%y/%m/%d-%H:%m')}")
-data_folder_name = src_time.strftime("%y%m%d") + "-" + dst_time.strftime("%y%m%d")
+str_date = datetime.datetime.strptime(str_time,"%y%m%d")
+src_date = str_date + datetime.timedelta(days=-delta_days)
+dst_date = src_date + datetime.timedelta(days=+range_days)
+src_time = src_date + datetime.timedelta(minutes=-10) # 收录的起始时间提前10分钟，防止漏掉
+dst_time = dst_date
+logging.info(f"选取时间 从 {src_time.strftime('%y/%m/%d-%H:%M')} 到 {dst_time.strftime('%y/%m/%d-%H:%M')}")
+data_folder_name = src_date.strftime("%y%m%d") + "-" + dst_date.strftime("%y%m%d")
 data_path = os.path.join(base_path, data_folder_name)
 if not os.path.exists(data_path): os.makedirs(data_path)
 
