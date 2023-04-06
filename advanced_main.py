@@ -55,7 +55,7 @@ with open("custom/adjust.csv",encoding="utf-8-sig",newline='') as adjustfile:
     for adj in adjustInfo:
         adjust_dic[int(adj["uid"])] = adj["k"]
 
-co_header = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k','o_title']
+co_header = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k','o_title','sp','st']
 logging.info('生成 TEditor CSV 表格')
 with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
     writer = csv.writer(csvfile)
@@ -83,7 +83,9 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(all_video_info[video]["pic"]),
             time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(all_video_info[video]["pubdate"]))),
             str(normk),
-            str(all_video_info[video]["title"])
+            str(all_video_info[video]["title"]),
+            '1',
+            ''
         ])
     vid_list = sorted(vid_list,key=lambda x:x[0],reverse=True)
     ranking = 0

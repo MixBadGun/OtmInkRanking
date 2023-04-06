@@ -46,17 +46,20 @@ def pickData(mainArr):
                 uploader = picked["owner"]["name"]
             else:
                 uploader = owner
-                shutil.copy("./template/avatar/truck.png",f"./avatar/{picked['aid']}.png")
+                if os.path.exists(f"./preavatar/{uploader}.png"):
+                    shutil.copy(f"./preavatar/{uploader}.png",f"./avatar/{picked['aid']}.png")
+                else:
+                    shutil.copy("./template/avatar/truck.png",f"./avatar/{picked['aid']}.png")
             timed = time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(picked["pubdate"])))
             oneArr = [picked["aid"],picked["bvid"],picked["cid"],picked["title"],reason,uploader,timed,picked["duration"],picker]
             allArr.append(oneArr)
             writer.writerow(oneArr)
             logging.info("一个 Pick Up 作品已记录")
             # 下载头像
-            face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(picked["aid"])).json()["data"]["owner"]["face"]
             if os.path.exists("avatar/"+ str(picked["aid"]) + ".png"):
                 pass
             else:
+                face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(picked["aid"])).json()["data"]["owner"]["face"]
                 with open("avatar/"+ str(picked["aid"]) + ".png", "wb") as f:
                     f.write(requests.get(url=face).content)
         if os.path.exists("./custom/pick.csv"):

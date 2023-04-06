@@ -1,7 +1,7 @@
 from config import *
 import ffmpeg
 
-def MainVideo(aid,start_time,sep_time,ranking):
+def MainVideo(aid,start_time,sep_time,ranking,srking):
     # 获取模板文件
 
     mainStart = ffmpeg.input("./template/main/back_come.mp4",**read_format)
@@ -35,6 +35,6 @@ def MainVideo(aid,start_time,sep_time,ranking):
 
     combinationVideo = ffmpeg.filter([main_back,usingVideoSourceMasked],"overlay")
     combinationVideo = ffmpeg.filter([combinationVideo,coverImage],"overlay")
-    ffmpeg.output(combinationVideo,videoSourceAudio,'./output_clips/MainRank_'+str(ranking)+".mp4",**render_format).run()
+    ffmpeg.output(combinationVideo,videoSourceAudio,'./output_clips/MainRank_'+str(srking)+".mp4",**render_format).run()
 
     muitl_limit.release()

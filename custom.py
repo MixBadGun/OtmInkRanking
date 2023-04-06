@@ -13,6 +13,13 @@ from config import *
 
 usedTime = time.strftime("%Y%m%d", time.localtime())
 
+def bv2av(bvid):
+    time.sleep(0.05)
+    site = "https://api.bilibili.com/x/web-interface/view?bvid=" + bvid
+    lst = requests.get(site).json()
+    if lst["code"] != 0: return "视频不存在！"
+    return lst["data"]["aid"]
+
 def real_len(letter):
     if (unicodedata.east_asian_width(letter) in ('F','W','A')):
         return 2
@@ -34,13 +41,19 @@ def reasons(reasoning):
         if charc % 14 == 0:
             reason.append(reasoning[charc:charc+14])
     return "\n".join(reason)
-customHeader = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k']
+customHeader = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k','o_title','sp','st']
 
 with open('data/customed.csv','w',encoding="utf-8-sig", newline='') as csvWrites:
     writer = csv.writer(csvWrites)
     writer.writerow(customHeader)
     async def getInfo(aid,owner):
-        custAllInfo = video.Video(aid=int(aid))
+        if(aid[0] != "A" and aid[0] != "a" and aid[0] == "B"):
+            it = bv2av(str(aid[2:]))
+        elif(aid[0] in "Aa"):
+            it = aid[2:]
+        else:
+            it = aid
+        custAllInfo = video.Video(aid=int(it))
         custed = await custAllInfo.get_info()
         if owner == None or owner == "": # 判断是否指定了作者
             uploader = custed["owner"]["name"]
@@ -68,7 +81,8 @@ with open('data/customed.csv','w',encoding="utf-8-sig", newline='') as csvWrites
             custed["stat"]["favorite"],
             custed["pic"],
             timed,
-            ""
+            "",
+            custed["title"]
             ]
         writer.writerow(oneArr)
         logging.info("一个 Custom 作品已记录")

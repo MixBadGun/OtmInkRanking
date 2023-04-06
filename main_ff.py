@@ -39,14 +39,14 @@ from config import *
 
 # 获取数据
 ranked_list = []
-datafile = open("custom/data.csv","r",encoding="utf-8-sig")
-ranked_lists = csv.reader(datafile)
-ok = 0
-for sti in ranked_lists:
-    if ok == 0:
-        ok += 1
-        continue
-    ranked_list.append(sti)
+with open("custom/data.csv","r",encoding="utf-8-sig") as datafile:
+    ranked_lists = csv.reader(datafile)
+    ok = 0
+    for sti in ranked_lists:
+        if ok == 0:
+            ok += 1
+            continue
+        ranked_list.append(sti)
 mainArr = []
 ignum = 0
 for ig in ranked_list:
@@ -56,14 +56,18 @@ for ig in ranked_list:
     mainArr.append(str(ig[2]))
 
 # 视频下载
-def getVideo(aid):
+def getVideo(aid,part):
     command = ["./lux"]
+    if part > 1:
+        p_src = f"?p={part}"
+    else:
+        p_src = ""
     if os.path.exists(f"./cookies/cookie.txt"):
         command.append("-c")
         command.append("./cookies/cookie.txt")
     if os.path.exists(f"./video/{aid}.mp4"):
         return
-    subprocess.Popen(command + ["-o","./video","-O",aid,f"av{aid}"]).wait()
+    subprocess.Popen(command + ["-o","./video","-O",aid,f"av{aid}{p_src}"]).wait()
 
 # PICK UP 数据
 picked_list = []
@@ -79,29 +83,36 @@ if os.path.exists(f"./custom/picked/{usedTime}-picked.csv"):
 
 # 主榜段落合成
 muitl_render = []
+render_times = 0
 for viding in ranked_list:
-    ranking = int(viding[0])
-    if ranking > main_end:
+    render_times += 1
+    ranking = viding[0]
+    if render_times > main_end:
         break
     if os.path.exists(f"./output_clips/MainRank_{ranking}.mp4"):
         continue
     aid = viding[2]
     bvid = viding[3]
     cid = viding[4]
-    getVideo(aid)
+    part_name = int(viding[15])
+    st_name = viding[16]
+    getVideo(aid,part_name)
     full_time = exactVideoLength(aid)
-    if ranking == 1:
+    if render_times == 1:
         # 副榜段落合成
         if os.path.exists("./output_clips/SideRank.mp4"):
             pass
         elif os.path.exists("./custom/ed.mp4"):
             SideVideo(main_end,side_end,side_count)
         else:
-            MainToSideVideo(aid,0,sep_time,1)
+            MainToSideVideo(aid,0,sep_time,ranking)
             continue
-    start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
+    if st_name == "":
+        start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
+    else:
+        start_time,end_time = int(st_name),sep_time
     muitl_limit.acquire()
-    single_render = threading.Thread(target=MainVideo,args=(aid,start_time,end_time,ranking))
+    single_render = threading.Thread(target=MainVideo,args=(aid,start_time,end_time,render_times,ranking))
     single_render.start()
     muitl_render.append(single_render)
 for fg in muitl_render:

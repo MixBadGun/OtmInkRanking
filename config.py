@@ -23,6 +23,8 @@ screenRatio = 16 / 9
 
 main_to_side_offset = -1
 
+insert_count = 5 # 主榜中断个数
+
 render_format = {
     "vcodec": "h264_nvenc", # 若没有 CUDA 加速，请切换为其它编码器或直接注释本行。
     "video_bitrate" : "10000k",
@@ -31,7 +33,8 @@ render_format = {
 all_render_format = {
     "vcodec": "h264_nvenc", # 若没有 CUDA 加速，请切换为其它编码器或直接注释本行。
     "video_bitrate" : "10000k",
-    "audio_bitrate" : "320k"
+    "audio_bitrate" : "320k",
+    "r": "60"
 }
 read_format = {
     "vcodec": "h264_cuvid" # 若没有 CUDA 加速，请切换为其它编码器或直接注释本行。
