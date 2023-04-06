@@ -22,7 +22,7 @@ import danmuku_time
 
 # 新建文件夹
 
-dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","video","cookies"]
+dirpaths = ["avatar","cover","custom","data","fast_view","fonts","log","output_all","output_clips","video","cookies","preavatar"]
 for dirpath in dirpaths:
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
