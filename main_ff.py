@@ -129,7 +129,7 @@ for picking in picked_list:
     aid = picking[0]
     bvid = picking[1]
     cid = picking[2]
-    getVideo(aid)
+    getVideo(aid,1)
     full_time = exactVideoLength(aid)
     start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
     muitl_limit.acquire()
