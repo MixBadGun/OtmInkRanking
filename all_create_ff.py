@@ -68,7 +68,7 @@ def AllVideo(main_end,pickArr,usedTime):
         rank_src = main_rank_column[clips]
         AllArr.append(ffVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
         AllArr.append(ffVideo("./template/pass/pass.mp4"))
-    rank_src = main_rank_column[insert_count]
+    rank_src = main_rank_column[insert_count+1]
     AllArr.append(ffVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
 
     # Pick Up
