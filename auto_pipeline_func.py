@@ -61,7 +61,7 @@ def get_info(page: int, video_zone: int, ps=20):
         # video.pop('tid')
         video.pop('state')
         video.pop('rights')
-        video.pop("short_link")
+        # video.pop("short_link")
         video.pop("short_link_v2")
         video.pop("is_ogv")
         video.pop("ogv_info")
