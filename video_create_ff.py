@@ -26,10 +26,10 @@ def MainVideo(aid,start_time,sep_time,ranking,srking):
     videoSourceAudio = ffmpeg.filter(videoSource.audio,"afade",t="in",d=1)
     videoSourceAudio = ffmpeg.filter(videoSourceAudio,"afade",t="out",st=sep_time-1,d=1)
     usingVideoSource = ffmpeg.filter(videoSource.video,"framerate",fps=60)
-    if(videoRatio > screenRatio):
-        usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=1280,h=-1)
+    if(videoRatio >= screenRatio):
+        usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=1281,h=-1)
     else:
-        usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=-1,h=720)
+        usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=-1,h=721)
     usingVideoSourceScaled = ffmpeg.filter([backImage,usingVideoSource],"overlay",x="82+1280/2-w/2",y="57+720/2-h/2")
     usingVideoSourceMasked = ffmpeg.filter([usingVideoSourceScaled,main_mask],"alphamerge")
 
