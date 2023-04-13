@@ -101,11 +101,21 @@ def AllVideo(main_end,pickArr,usedTime):
         AllArr.append(ffVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
         AllArr.append(ffVideo("./template/pass/pass.mp4"))
     rank_src = main_rank_column[1]
-    AllArr.append(ffVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
 
     if os.path.exists("./custom/ed.mp4"):
+        AllArr.append(ffVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
         AllArr.append(ffVideo("./template/pass/passSide.mp4"))
-        AllArr.append(ffVideo("./output_clips/SideRank.mp4"))
+        if end_logo:
+            AllArr.append(outVideo("./output_clips/SideRank.mp4"))
+            AllArr.append(inVideo("./custom/end_logo.mp4"))
+        else:
+            AllArr.append(ffVideo("./output_clips/SideRank.mp4"))
+    else:
+        if end_logo:
+            AllArr.append(outVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
+            AllArr.append(inVideo("./custom/end_logo.mp4"))
+        else:
+            AllArr.append(ffVideo(f"./output_clips/MainRank_{rank_src}.mp4"))
 
     onum = 0
     for items in AllArr:
