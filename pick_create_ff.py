@@ -30,7 +30,7 @@ def PickVideo(aid,start_time,sep_time,picks):
         usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=1281,h=-1)
     else:
         usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=-1,h=721)
-    usingVideoSourceScaled = ffmpeg.filter([backImage,usingVideoSource],"overlay",x="557+1280/2-w/2",y="89+720/2-h/2")
+    usingVideoSourceScaled = ffmpeg.filter([backImage,usingVideoSource],"overlay",x="557+1281/2-w/2",y="89+721/2-h/2")
     usingVideoSourceMasked = ffmpeg.filter([usingVideoSourceScaled,pick_mask],"alphamerge")
 
     combinationVideo = ffmpeg.filter([pick_back,usingVideoSourceMasked],"overlay")

@@ -30,7 +30,7 @@ def MainVideo(aid,start_time,sep_time,ranking,srking):
         usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=1281,h=-1)
     else:
         usingVideoSource = ffmpeg.filter(usingVideoSource,"scale",w=-1,h=721)
-    usingVideoSourceScaled = ffmpeg.filter([backImage,usingVideoSource],"overlay",x="82+1280/2-w/2",y="57+720/2-h/2")
+    usingVideoSourceScaled = ffmpeg.filter([backImage,usingVideoSource],"overlay",x="82+1281/2-w/2",y="57+721/2-h/2")
     usingVideoSourceMasked = ffmpeg.filter([usingVideoSourceScaled,main_mask],"alphamerge")
 
     combinationVideo = ffmpeg.filter([main_back,usingVideoSourceMasked],"overlay")
