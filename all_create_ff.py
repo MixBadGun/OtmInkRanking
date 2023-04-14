@@ -18,7 +18,8 @@ def inVideo(file):
     name = file.split("/")[-1]
     vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",st=0,d=0.5)
-    ffmpeg.output(viv,f"./output_clips/temp/{name}",**render_format).run()
+    if not os.path.exists(f"./output_clips/temp/{name}"):
+        ffmpeg.output(viv,f"./output_clips/temp/{name}",**render_format).run()
     viw = ffmpeg.input(f"./output_clips/temp/{name}",**read_format)
     aud = vi.audio
     return [viw,aud]
@@ -28,7 +29,8 @@ def inoutVideo(file):
     vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",st=0,d=0.5)
     viv = viv.filter("fade",t="out",st=duration(file,-0.5),d=0.5)
-    ffmpeg.output(viv,f"./output_clips/temp/{name}",**render_format).run()
+    if not os.path.exists(f"./output_clips/temp/{name}"):
+        ffmpeg.output(viv,f"./output_clips/temp/{name}",**render_format).run()
     viw = ffmpeg.input(f"./output_clips/temp/{name}",**read_format)
     aud = vi.audio
     return [viw,aud]
@@ -37,7 +39,8 @@ def outVideo(file):
     name = file.split("/")[-1]
     vi = ffmpeg.input(file,**read_format)
     viv = vi.filter("fade",t="out",st=duration(file,-0.5),d=0.5)
-    ffmpeg.output(viv,f"./output_clips/temp/{name}",**render_format).run()
+    if not os.path.exists(f"./output_clips/temp/{name}"):
+        ffmpeg.output(viv,f"./output_clips/temp/{name}",**render_format).run()
     viw = ffmpeg.input(f"./output_clips/temp/{name}",**read_format)
     aud = vi.audio
     return [viw,aud]
