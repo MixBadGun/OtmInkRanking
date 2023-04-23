@@ -11,6 +11,7 @@ from pick_create_ff import PickVideo
 from all_create_ff import AllVideo
 from opening_create_ff import OpeningVideo
 from video_create_ff_main_to_side import MainToSideVideo
+from function import exactVideoLength , getVideo , convert_csv
 logging.basicConfig(format='[%(levelname)s]\t%(message)s',filename="log/" + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', level=logging.DEBUG)
 formatter = logging.Formatter('[%(levelname)s]\t%(message)s')
 console_handler = logging.StreamHandler()
@@ -27,26 +28,14 @@ for dirpath in dirpaths:
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
 
-# 精确视频长度
-
-def exactVideoLength(aid):
-    tdur = float(ffmpeg.probe(f"./video/{aid}.mp4")["streams"][0]["duration"])
-    return tdur
-
 # 声明变量
 
 from config import *
 
 # 获取数据
-ranked_list = []
-with open("custom/data.csv","r",encoding="utf-8-sig") as datafile:
-    ranked_lists = csv.reader(datafile)
-    ok = 0
-    for sti in ranked_lists:
-        if ok == 0:
-            ok += 1
-            continue
-        ranked_list.append(sti)
+
+ranked_list = convert_csv("custom/data.csv")
+
 mainArr = []
 ignum = 0
 for ig in ranked_list:
@@ -55,31 +44,10 @@ for ig in ranked_list:
         break
     mainArr.append(str(ig[2]))
 
-# 视频下载
-def getVideo(aid,part):
-    command = ["./lux"]
-    if part > 1:
-        p_src = f"?p={part}"
-    else:
-        p_src = ""
-    if os.path.exists(f"./cookies/cookie.txt"):
-        command.append("-c")
-        command.append("./cookies/cookie.txt")
-    if os.path.exists(f"./video/{aid}.mp4"):
-        return
-    subprocess.Popen(command + ["-o","./video","-O",aid,f"av{aid}{p_src}"]).wait()
-
 # PICK UP 数据
 picked_list = []
 if os.path.exists(f"./custom/picked/{usedTime}-picked.csv"):
-    pickFile = open(f"./custom/picked/{usedTime}-picked.csv","r",encoding="utf-8-sig")
-    pickArr = csv.reader(pickFile)
-    ok = 0
-    for sti in pickArr:
-        if ok == 0:
-            ok += 1
-            continue
-        picked_list.append(sti)
+    picked_list = convert_csv(f"./custom/picked/{usedTime}-picked.csv")
 
 # 主榜段落合成
 muitl_render = []

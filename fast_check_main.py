@@ -7,21 +7,13 @@ import datetime
 import subprocess
 import os
 import shutil
+from function import getVideo,turnAid
 
-def getVideo(aid):
-    subprocess.Popen(f'lux -c ./cookies/cookie.txt -o ./fast_check/ -O ed av{aid}').wait()
 
-def turnAid(id):
-    if ("av" in id) or ("AV" in id):
-        return id[2:]
-    elif ("BV" in id):
-        site = "https://api.bilibili.com/x/web-interface/view?bvid=" + id
-        lst = codecs.decode(requests.get(site).content, "utf-8").split("\"")
-        return str(lst[16][1:-1])
 
 with open("./fast_check/source/pick_data.csv","r",encoding="utf-8-sig",newline='') as csvfile:
     listed = csv.DictReader(csvfile)
-    min_time = datetime.datetime.today() + datetime.timedelta(days=-10)
+    min_time = datetime.datetime.today() + datetime.timedelta(days=-8)
     with open("./fast_check/source/pick.csv","w",encoding="utf-8-sig",newline='') as csvwrite:
         writefile = csv.writer(csvwrite)
         writefile.writerow(["aid","reason","picker","owner"])

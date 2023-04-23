@@ -1,14 +1,13 @@
 import csv
-import requests
 import asyncio
 from PIL import Image
 import shutil
 import logging
 import subprocess
-import unicodedata
 from moviepy.editor import *
 from bilibili_api import video
-import git
+from function import get_img,wrap_text
+# import git
 
 # 声明变量
 
@@ -34,28 +33,12 @@ for ig in ranked_list:
         break
     mainArr.append(str(ig[2]))
 
-# 封面 & 头像下载
+# 主榜封面 & 头像下载
 
 ranking = 0
 while(ranking < main_end + side_end):
     vid = ranked_list[ranking]
-    if os.path.exists("cover/"+ str(vid[2]) + ".png"):
-        pass
-    else:
-        with open("cover/"+ str(vid[2]) + ".png", "wb") as f:
-            f.write(requests.get(url=vid[11]).content)
-    if os.path.exists("avatar/"+ str(vid[2]) + ".png"):
-        pass
-    else:
-        face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(vid[2])).json()["data"]["owner"]["face"]
-        if(face.split(".")[-1] in staticFormat): # 判断静态图片
-            with open("avatar/"+ str(vid[2]) + ".png", "wb") as f:
-                f.write(requests.get(url=face).content)
-        else:
-            tempImage = f"avatar/{vid[2]}.{face.split('.')[-1]}"
-            with open(tempImage, "wb") as f:
-                f.write(requests.get(url=face).content)
-                Image.open(tempImage).save("avatar/"+ str(vid[2]) + ".png")
+    get_img(vid[2])
     ranking += 1
 
 # 快速导航导出
@@ -68,33 +51,13 @@ for ranked in ranked_list:
     with open(f"./fast_view/bili_{usedTime}.txt","a",encoding="utf-8-sig") as fast:
         fast.write(f"{ranks}\t{ranked[3]}\n")
     with open(f"./fast_view/wiki_{usedTime}.txt","a",encoding="utf-8-sig") as fast:
-        fast.write("{{"+f"OtmRanking/brick\n|ranking={ranked[0]}\n|title={ranked[5]}\n|score={ranked[1]}\n|aid={ranked[2]}"+"\n}}\n")
+        fast.write("{{"+f"OtmRanking/brick\n|ranking={ranked[0]}\n|title={ranked[14]}\n|score={ranked[1]}\n|aid={ranked[2]}"+"\n}}\n")
 
 # Pick Up
 
 allArr = []
 usedTime = time.strftime("%Y%m%d", time.localtime())
 
-def real_len(letter):
-    if (unicodedata.east_asian_width(letter) in ('F','W','A')):
-        return 2
-    else:
-        return 1
-
-def reasons(reasoning):
-    reason = ""
-    max_n = 0
-    for charc in reasoning:
-        if charc == "\n":
-            max_n = 0
-            reason += "\n"
-            continue
-        if max_n >= pick_max_reason:
-            reason += "\n"
-            max_n = 0
-        reason += charc
-        max_n += real_len(charc)
-    return reason
 pickHeader = ["aid","bvid","cid","title","reason","uploader","pubtime","full_time","picker"]
 
 with open(f"./custom/picked/{usedTime}-picked.csv",'w',encoding="utf-8-sig", newline='') as csvWrites:
@@ -114,25 +77,14 @@ with open(f"./custom/picked/{usedTime}-picked.csv",'w',encoding="utf-8-sig", new
         writer.writerow(oneArr)
         logging.info("一个 Pick Up 作品已记录")
         # 下载头像
-        if os.path.exists("avatar/"+ str(picked["aid"]) + ".png"):
-            pass
-        else:
-            face = requests.get(url="https://api.bilibili.com/x/web-interface/view?aid=" + str(picked["aid"])).json()["data"]["owner"]["face"]
-            if(face.split(".")[-1] in staticFormat): # 判断静态图片
-                with open("avatar/"+ str(picked["aid"]) + ".png", "wb") as f:
-                    f.write(requests.get(url=face).content)
-            else:
-                tempImage = f"avatar/{picked['aid']}.{face.split('.')[-1]}"
-                with open(tempImage, "wb") as f:
-                    f.write(requests.get(url=face).content)
-                    Image.open(tempImage).save("avatar/"+ str(picked['aid']) + ".png")
+        get_img(picked["aid"],True,uploader)
     if os.path.exists("./custom/pick.csv"):
         with open("custom/pick.csv",encoding="utf-8-sig",newline='') as csvfile:
             pickInfo = csv.DictReader(csvfile)
             for pick in pickInfo:
                 if str(pick["aid"]) in mainArr: # 判断主榜是否已经存在 Pick Up 作品
                     continue
-                asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],reasons(pick["reason"]),pick["owner"],pick["picker"]))
+                asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],wrap_text(pick["reason"],pick_max_reason),pick["owner"],pick["picker"]))
 if len(allArr) == 0:
     os.remove(f"./custom/picked/{usedTime}-picked.csv")
 

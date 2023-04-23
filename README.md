@@ -45,13 +45,8 @@ python second_main.py
 视频合成所需文件也将保存在`custom`文件夹中，将`custom`文件夹拷贝到异机同样可以渲染。
 检查无误后，随后进行视频合成。
 
-* 方法一 **（推荐）**（使用 FFmpeg 渲染）
 ```bash
 python main_ff.py
-```
-* 方法二（使用 Moviepy 合成）
-```bash
-python main.py
 ```
 
 视频将保存至`output_all`文件夹中。

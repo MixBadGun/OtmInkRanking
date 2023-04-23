@@ -5,6 +5,7 @@ import os
 import unicodedata
 from config import *
 from auto_pipeline import all_video_info , aid_to_score_norm
+from function import real_len,passMn,all_len,short_text
 import shutil
 # 新建文件夹
 
@@ -13,42 +14,16 @@ for dirpath in dirpaths:
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
 
-# 字符长度判断
-
-def real_len(letter):
-    widLetter = "ABCDEFGHJKLMNOPQRSTUVWXYZm"
-    NarrowLetter = "Iijl()[].;:!\'\"`{}"
-    if letter in widLetter:
-        return 1.5
-    if letter in NarrowLetter:
-        return 0.5
-    if (unicodedata.east_asian_width(letter) in ('F','W','A')):
-        return 2
-    else:
-        return 1
-def passMn(text):
-    outsil = ""
-    for sil in text:
-        if unicodedata.category(sil) != "Mn":
-            outsil += sil
-    return outsil
-
-def all_len(text,maxlen):
-    ink = 0
-    outlen = 0
-    for lett in text:
-        if outlen < maxlen:
-            ink += 1
-        outlen += real_len(lett)
-    return outlen , ink
-
 # 预先黑名单
+
 blackArr = []
 with open("custom/blacklist.csv",encoding="utf-8-sig",newline='') as blackfile:
     blackInfo = csv.DictReader(blackfile)
     for bl in blackInfo:
         blackArr.append(int(bl["aid"]))
+
 # 预先内容调整
+
 adjust_dic = {}
 with open("custom/adjust.csv",encoding="utf-8-sig",newline='') as adjustfile:
     adjustInfo = csv.DictReader(adjustfile)
@@ -96,14 +71,9 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
         vid[4] = passMn(vid[4])
         # 判断长度进行伸缩
         if (ranking <= main_end):
-            allLength , shortRange = all_len(vid[4],main_max_title * 2)
-            if (allLength > main_max_title * 2):
-                vid[4] = vid[4][0:shortRange - 2] + "..."
+            vid[4] = short_text(vid[4],main_max_title)
         elif (ranking <= main_end + side_end):
-            allLength , shortRange = all_len(vid[4],side_max_title * 2)
-            if (allLength > side_max_title * 2):
-                vid[4] = vid[4][0:shortRange - 2] + "..."
-        # 简易start_time判断
+            vid[4] = short_text(vid[4],side_max_title)
         ranked_list.append([ranking] + vid)
     writer.writerows(ranked_list)
 shutil.copy("./custom/data.csv","./fast_check/source/data.csv")
