@@ -36,9 +36,13 @@ for ig in ranked_list:
 # 主榜封面 & 头像下载
 
 ranking = 0
-while(ranking < main_end + side_end):
+while(ranking < main_end):
     vid = ranked_list[ranking]
     get_img(vid[2])
+    ranking += 1
+while(ranking < main_end + side_end):
+    vid = ranked_list[ranking]
+    get_img(vid[2],side = True)
     ranking += 1
 
 # 快速导航导出
