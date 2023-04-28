@@ -61,18 +61,19 @@ def get_img(aid,stored = False,uploader = "None",side = False):
     cover = video_data["data"]["pic"]
     # 头像
     if not os.path.exists(f"avatar/{aid}.png"):
+        ava_size = avatar_size if not side else side_avatar_size
         if stored:
             if os.path.exists(f"./preavatar/{uploader}.png"):
                 avatar_src = f"./preavatar/{uploader}.png"
             else:
                 avatar_src = "./template/avatar/truck.png"
             img = Image.open(avatar_src)
-            img_scaled = img.resize(avatar_size,Image.ANTIALIAS)
+            img_scaled = img.resize(ava_size,Image.ANTIALIAS)
             img_scaled.save(f"./avatar/{aid}.png")
         else:
             img_content = requests.get(url=face).content
             img = Image.open(BytesIO(img_content))
-            img_scaled = img.resize(avatar_size,Image.ANTIALIAS)
+            img_scaled = img.resize(ava_size,Image.ANTIALIAS)
             img_scaled.save(f"avatar/{aid}.png")
     # 封面
     if not os.path.exists(f"cover/{aid}.png"):
