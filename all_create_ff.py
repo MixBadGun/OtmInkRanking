@@ -56,7 +56,7 @@ def AllVideo(main_end,pickArr,usedTime):
             AllArr.append(inoutVideo(f"./custom/ads/{ads}"))
             trueFiles.append(ads)
     if len(trueFiles) > 0:
-        AllArr.append(inoutVideo("./output_clips/Opening.mp4"))
+        AllArr.append(inVideo("./output_clips/Opening.mp4"))
     else:
         AllArr.append(ffVideo("./output_clips/Opening.mp4"))
     filePath = f"./output_clips/{usedTime}"

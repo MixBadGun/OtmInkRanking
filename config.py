@@ -21,7 +21,10 @@ delta_days = 11 # 以今天往前的第 delta_days 日开始统计
 range_days = 7 # 统计 range_days 天的数据
 screenRatio = 16 / 9
 
-end_logo = False
+avatar_size = (70,70)
+cover_size = (401,251)
+
+end_logo = True
 
 main_to_side_offset = -1
 

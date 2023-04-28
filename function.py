@@ -1,8 +1,9 @@
 import requests
-import shutil
 import subprocess
 import codecs
 import csv
+import ffmpeg
+from io import BytesIO
 from PIL import Image
 import unicodedata
 from config import *
@@ -58,22 +59,23 @@ def get_img(aid,stored = False,uploader = "None"):
     if not os.path.exists(f"avatar/{aid}.png"):
         if stored:
             if os.path.exists(f"./preavatar/{uploader}.png"):
-                shutil.copy(f"./preavatar/{uploader}.png",f"./avatar/{aid}.png")
+                avatar_src = f"./preavatar/{uploader}.png"
             else:
-                shutil.copy("./template/avatar/truck.png",f"./avatar/{aid}.png")
+                avatar_src = "./template/avatar/truck.png"
+            img = Image.open(avatar_src)
+            img_scaled = img.resize(avatar_size,Image.ANTIALIAS)
+            img_scaled.save(f"./avatar/{aid}.png")
         else:
-            if(face.split(".")[-1] in staticFormat): # 判断静态图片
-                with open(f"avatar/{aid}.png", "wb") as f:
-                    f.write(requests.get(url=face).content)
-            else:
-                tempImage = f"avatar/{aid}.{face.split('.')[-1]}"
-                with open(tempImage, "wb") as f:
-                    f.write(requests.get(url=face).content)
-                    Image.open(tempImage).save(f"./avatar/{aid}.png")
+            img_content = requests.get(url=face).content
+            img = Image.open(BytesIO(img_content))
+            img_scaled = img.resize(avatar_size,Image.ANTIALIAS)
+            img_scaled.save(f"avatar/{aid}.png")
     # 封面
     if not os.path.exists(f"cover/{aid}.png"):
-        with open(f"cover/{aid}.png", "wb") as f:
-            f.write(requests.get(url=cover).content)
+        img_content = requests.get(url=cover).content
+        img = Image.open(BytesIO(img_content))
+        img_scaled = img.resize(cover_size,Image.ANTIALIAS)
+        img_scaled.save(f"cover/{aid}.png")
 
 def getVideo(aid):
     subprocess.Popen(f'lux -c ./cookies/cookie.txt -o ./fast_check/ -O ed av{aid}').wait()
