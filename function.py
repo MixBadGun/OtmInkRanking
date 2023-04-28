@@ -1,4 +1,5 @@
 import requests
+import logging
 import subprocess
 import codecs
 import csv
@@ -53,6 +54,9 @@ def all_len(text,maxlen):
 
 def get_img(aid,stored = False,uploader = "None"):
     video_data = requests.get(url=f"https://api.bilibili.com/x/web-interface/view?aid={aid}").json()
+    if video_data["code"] != 0:
+        logging.error(f"检测到 av{aid} 的视频状态异常！请确认该视频状态，若有问题则可以立即退出本程序。否则按回车键继续。")
+        input()
     face = video_data["data"]["owner"]["face"]
     cover = video_data["data"]["pic"]
     # 头像
