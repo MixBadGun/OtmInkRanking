@@ -23,6 +23,7 @@ screenRatio = 16 / 9
 
 avatar_size = (70,70)
 cover_size = (401,251)
+side_avatar_size = (38,38)
 side_cover_size = (276,156)
 
 end_logo = True
