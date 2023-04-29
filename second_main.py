@@ -70,18 +70,19 @@ with open(f"./custom/picked/{usedTime}-picked.csv",'w',encoding="utf-8-sig", new
     async def getInfo(aid,reason,owner,picker):
         pickAllInfo = video.Video(aid=int(aid))
         picked = await pickAllInfo.get_info()
+        other = False
         if owner == None or owner == "": # 判断是否指定了作者
             uploader = picked["owner"]["name"]
         else:
             uploader = owner
-            shutil.copy("./template/avatar/truck.png",f"./avatar/{picked['aid']}.png")
+            other = True
         timed = time.strftime("%Y/%m/%d %H:%M:%S",time.localtime(int(picked["pubdate"])))
         oneArr = [picked["aid"],picked["bvid"],picked["cid"],picked["title"],reason,uploader,timed,picked["duration"],picker]
         allArr.append(oneArr)
         writer.writerow(oneArr)
         logging.info("一个 Pick Up 作品已记录")
         # 下载头像
-        get_img(picked["aid"],True,uploader)
+        await get_img(picked["aid"],other,uploader)
     if os.path.exists("./custom/pick.csv"):
         with open("custom/pick.csv",encoding="utf-8-sig",newline='') as csvfile:
             pickInfo = csv.DictReader(csvfile)
