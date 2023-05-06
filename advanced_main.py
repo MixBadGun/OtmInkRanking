@@ -2,10 +2,9 @@ import csv
 import time
 import logging
 import os
-import unicodedata
 from config import *
 from auto_pipeline import all_video_info , aid_to_score_norm
-from function import real_len,passMn,all_len,short_text
+from function import passMn,short_text
 import shutil
 # 新建文件夹
 

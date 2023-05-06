@@ -60,7 +60,6 @@ for ranked in ranked_list:
 # Pick Up
 
 allArr = []
-usedTime = time.strftime("%Y%m%d", time.localtime())
 
 pickHeader = ["aid","bvid","cid","title","reason","uploader","pubtime","full_time","picker"]
 
@@ -82,14 +81,14 @@ with open(f"./custom/picked/{usedTime}-picked.csv",'w',encoding="utf-8-sig", new
         writer.writerow(oneArr)
         logging.info("一个 Pick Up 作品已记录")
         # 下载头像
-        await get_img(picked["aid"],other,uploader)
+        get_img(picked["aid"],other,uploader)
     if os.path.exists("./custom/pick.csv"):
         with open("custom/pick.csv",encoding="utf-8-sig",newline='') as csvfile:
             pickInfo = csv.DictReader(csvfile)
             for pick in pickInfo:
                 if str(pick["aid"]) in mainArr: # 判断主榜是否已经存在 Pick Up 作品
                     continue
-                asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],wrap_text(pick["reason"],pick_max_reason),pick["owner"],pick["picker"]))
+                asyncio.get_event_loop().run_until_complete(getInfo(pick["aid"],wrap_text(pick["reason"],pick_max_reason,pick_max_box),pick["owner"],pick["picker"]))
 if len(allArr) == 0:
     os.remove(f"./custom/picked/{usedTime}-picked.csv")
 

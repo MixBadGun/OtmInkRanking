@@ -9,7 +9,7 @@ from PIL import Image
 import unicodedata
 from config import *
 
-def wrap_text(text,max_letter = 20):
+def wrap_text(text,max_letter = 20,all_max = 10000):
     reason = ""
     max_n = 0
     for charc in text:
@@ -22,6 +22,7 @@ def wrap_text(text,max_letter = 20):
             max_n = 0
         reason += charc
         max_n += real_len(charc)
+    reason = short_text(reason,all_max)
     return reason
 
 def real_len(letter):
@@ -96,7 +97,7 @@ def turnAid(id):
 
 def short_text(text,max_lenth = 20):
     allLength , shortRange = all_len(text,max_lenth * 2)
-    if (allLength > main_max_title * 2):
+    if (allLength > max_lenth * 2):
         text = text[0:shortRange - 2] + "..."
     return text
 
