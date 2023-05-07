@@ -1,7 +1,6 @@
 import csv
 import asyncio
 from PIL import Image
-import shutil
 import logging
 import subprocess
 from moviepy.editor import *
