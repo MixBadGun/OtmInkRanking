@@ -13,7 +13,7 @@ from auto_pipeline_func import *
 str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期
 base_path = "./AutoData/"   # 数据存储路径
 
-video_zones = [26]#[26, 126, 22]
+video_zones = [26, 126, 22]
 # 鬼畜: 119（不要用这个）; 音 MAD: 26; 人力: 126; 鬼调: 22
 # 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/video/video_zone.md
 
