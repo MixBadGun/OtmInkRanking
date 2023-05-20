@@ -141,7 +141,10 @@ output_image/
 video/
 custom/
 cover/
+template/
 
 TEditor.exe
 lux.exe
-AutoData/
+AutoData/**
+!AutoData/all_mid_list.dat
+!AutoData/这个 all_mid_list 不要删
