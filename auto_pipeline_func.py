@@ -179,7 +179,7 @@ async def get_comments(aid: int) -> List[Dict]:
         time.sleep(1)
     return reply_processer(comments)
 
-def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], whitelist_filter: Callable[[Dict, List[str]], bool], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[Set[int], Set[int]]:
+def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], whitelist_filter: Callable[[Dict, List[str]], bool], force_update=False, max_try_times=10, sleep_inteval=3, include_reupload_video=False) -> Tuple[Set[int], Set[int]]:
     skipped_aid = set()
     invalid_aid_path = os.path.join(data_path, "invalid_aid.pkl")
     if os.path.exists(invalid_aid_path): invalid_aid = marshal.load(open(invalid_aid_path, "rb"))
@@ -190,7 +190,7 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], white
     for n, video_info in enumerate(all_video_info.values()):
         video_aid = video_info['aid']
         
-        if video_info['copyright'] != 1: continue # 只爬取原创视频
+        if not include_reupload_video and video_info['copyright'] != 1: continue # 是否只爬取原创视频
         video_comment_file_full_path = os.path.join(comment_data_folder, f"{video_aid}.json")
         if not force_update and os.path.exists(video_comment_file_full_path): continue
         if video_aid in invalid_aid: continue
@@ -228,7 +228,7 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], white
     if len(invalid_aid)>0: marshal.dump(invalid_aid, open(os.path.join(data_path, "invalid_aid.pkl"), "wb"))
     return skipped_aid, invalid_aid
 
-def calc_aid_score(video_info: Dict, comment_list: Optional[List[Dict]], good_key_words: List[str], bad_key_words: List[str], all_mid_list: Dict[int, Dict], s2_base:int=0, show_verbose=False) -> Tuple[float, float]:
+def calc_aid_score(video_info: Dict, comment_list: Optional[List[Dict]], good_key_words: List[str], bad_key_words: List[str], all_mid_list: Dict[int, Dict], s2_base:float=0, show_verbose=False) -> Tuple[float, float]:
     if list(comment_list)==0: return 0, 0
     aid_score = 0
     for comment in comment_list:

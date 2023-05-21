@@ -5,7 +5,7 @@ import marshal
 import datetime
 import logging
 from collections import defaultdict
-from config import delta_days, range_days
+from config import delta_days, range_days, include_reupload_video
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 
 from auto_pipeline_func import *
@@ -76,9 +76,13 @@ for aid in all_video_info.keys():
     comment_file_path = os.path.join(data_path, "comment_data", f"{aid}.json")
     if not (os.path.exists(comment_file_path) or aid in invalid_aid or all_video_info[aid]['copyright']!=1):
         logging.warning(f"comment file {comment_file_path} not found")
-        _, invalid_aid = retrieve_video_comment(data_path, all_video_info, sleep_inteval=1)
+        _, invalid_aid = retrieve_video_comment(
+            data_path, all_video_info, whitelist_filter,
+            sleep_inteval=1, include_reupload_video=include_reupload_video)
         if not os.path.exists(comment_file_path) or aid in invalid_aid: continue
-    if aid not in invalid_aid and all_video_info[aid]['copyright'] == 1:
+    if not include_reupload_video and all_video_info[aid]['copyright'] != 1:
+        continue
+    if aid not in invalid_aid:
         with open(comment_file_path, "r", encoding="utf-8") as f:
             comment_data = json.load(f)
             if 'comment' not in comment_data: continue
