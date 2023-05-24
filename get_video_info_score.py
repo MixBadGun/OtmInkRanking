@@ -13,9 +13,9 @@ from get_video_info_score_func import *
 str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期
 base_path = "./AutoData/"   # 数据存储路径
 
-video_zones = [26]#[26, 126, 22]
+video_zones = [26, 126, 22]
 # 鬼畜: 119（不要用这个）; 音 MAD: 26; 人力: 126; 鬼调: 22
-# 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/video/video_zone.md
+# 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/video_zone.md
 
 # 其实这些关键词的影响并不大
 target_good_key_words = [
@@ -122,6 +122,7 @@ logging.info("计分完成")
 #     aid_pubtime = datetime.datetime.fromtimestamp(video_info["pubdate"]).strftime("%y%m%d-%H%M%S")
 #     print("[av %i] 计分 = %5.6f @%s, 播放 %6i, 收藏 %5i, 评论 %3i || [uid %10i] %s: %s" % (aid, aid_score_norm, aid_pubtime, aid_view, aid_favorite, len(aid_comment), aiu_mid, aid_author, aid_title))
 
+# video_info 具体格式见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/info.md
 """
 >>> print(all_video_info[943387336])
 {'aid': 943387336,

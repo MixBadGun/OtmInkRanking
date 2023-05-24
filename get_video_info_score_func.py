@@ -148,6 +148,7 @@ def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: s
     marshal.dump(all_video_info, open(os.path.join(data_path, video_info_file_name), "wb"))
     return all_video_info
 
+# comment 具体格式见 https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/comment
 def reply_processer(comments: List[Dict]) -> List[Dict]:
     processed_comments = []
     for comment in comments:
