@@ -32,18 +32,6 @@ for ig in ranked_list:
         break
     mainArr.append(str(ig[2]))
 
-# 主榜封面 & 头像下载
-
-ranking = 0
-while(ranking < main_end):
-    vid = ranked_list[ranking]
-    get_img(vid[2])
-    ranking += 1
-while(ranking < main_end + side_end):
-    vid = ranked_list[ranking]
-    get_img(vid[2],side = True)
-    ranking += 1
-
 # 快速导航导出
 
 ranks = 0
@@ -55,6 +43,18 @@ for ranked in ranked_list:
         fast.write(f"{ranks}\t{ranked[3]}\n")
     with open(f"./fast_view/wiki_{usedTime}.txt","a",encoding="utf-8-sig") as fast:
         fast.write("{{"+f"OtmRanking/brick\n|ranking={ranked[0]}\n|title={ranked[14]}\n|score={ranked[1]}\n|aid={ranked[2]}"+"\n}}\n")
+
+# 主榜封面 & 头像下载
+
+ranking = 0
+while(ranking < main_end):
+    vid = ranked_list[ranking]
+    get_img(vid[2],copyright=vid[17])
+    ranking += 1
+while(ranking < main_end + side_end):
+    vid = ranked_list[ranking]
+    get_img(vid[2],side = True)
+    ranking += 1
 
 # Pick Up
 

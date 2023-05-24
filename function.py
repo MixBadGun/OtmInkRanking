@@ -53,7 +53,7 @@ def all_len(text,maxlen):
         outlen += real_len(lett)
     return outlen , ink
 
-def get_img(aid,stored = False,uploader = "None",side = False):
+def get_img(aid,stored = False,uploader = "None",side = False,copyright = 1):
     video_data = requests.get(url=f"https://api.bilibili.com/x/web-interface/view?aid={aid}").json()
     if video_data["code"] != 0:
         logging.error(f"检测到 av{aid} 的视频状态异常！请确认该视频状态，若有问题则可以立即退出本程序。否则按回车键继续。")
@@ -63,7 +63,7 @@ def get_img(aid,stored = False,uploader = "None",side = False):
     # 头像
     if not os.path.exists(f"avatar/{aid}.png"):
         ava_size = avatar_size if not side else side_avatar_size
-        if stored:
+        if stored or (copyright not in ["1",1]):
             if os.path.exists(f"./preavatar/{uploader}.png"):
                 avatar_src = f"./preavatar/{uploader}.png"
             else:

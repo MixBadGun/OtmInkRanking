@@ -29,7 +29,7 @@ with open("custom/adjust.csv",encoding="utf-8-sig",newline='') as adjustfile:
     for adj in adjustInfo:
         adjust_dic[int(adj["uid"])] = adj["k"]
 
-co_header = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k','o_title','sp','st']
+co_header = ['ranking','score','aid','bvid','cid','title','uploader','play','like','coin','star','cover_url','pubtime','k','o_title','sp','st','copyright','o_name']
 logging.info('生成 TEditor CSV 表格')
 with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
     writer = csv.writer(csvfile)
@@ -42,6 +42,10 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             normk = float(adjust_dic[all_video_info[video]["owner"]["mid"]])
         else:
             normk = 1
+        if str(all_video_info[video]["copyright"]) not in ["1",1]:
+            author_name = "转载"
+        else:
+            author_name = str(all_video_info[video]["owner"]["name"])
         norm_score = float('%.3f' % (aid_to_score_norm[all_video_info[video]["aid"]] * normk))
         vid_list.append([
             norm_score,
@@ -49,7 +53,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(all_video_info[video]["bvid"]),
             str(all_video_info[video]["cid"]),
             str(all_video_info[video]["title"]),
-            str(all_video_info[video]["owner"]["name"]),
+            author_name,
             str(all_video_info[video]["stat"]["view"]),
             str(all_video_info[video]["stat"]["like"]),
             str(all_video_info[video]["stat"]["coin"]),
@@ -59,7 +63,9 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(normk),
             str(all_video_info[video]["title"]),
             '1',
-            ''
+            '',
+            str(all_video_info[video]["copyright"]),
+            str(all_video_info[video]["owner"]["name"])
         ])
     vid_list = sorted(vid_list,key=lambda x:x[0],reverse=True)
     ranking = 0
