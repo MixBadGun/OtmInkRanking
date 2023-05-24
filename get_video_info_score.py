@@ -8,12 +8,12 @@ from collections import defaultdict
 from config import delta_days, range_days, include_reupload_video
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 
-from auto_pipeline_func import *
+from get_video_info_score_func import *
 
 str_time = datetime.datetime.now().strftime('%y%m%d') # 今天日期
 base_path = "./AutoData/"   # 数据存储路径
 
-video_zones = [26, 126, 22]
+video_zones = [26]#[26, 126, 22]
 # 鬼畜: 119（不要用这个）; 音 MAD: 26; 人力: 126; 鬼调: 22
 # 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/video/video_zone.md
 
@@ -57,7 +57,7 @@ for video_zone in video_zones:
 #     print(f"视频 av 号: {video_aid}, 发布时间: {video_pubtime}, 标题: {video_title}, 版权: {video_copyright}, 视频分区: {video_zone}")
 logging.info(f"视频信息获取完成，视频总数: {len(all_video_info)}")
 
-skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, whitelist_filter, sleep_inteval=1)
+skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, whitelist_filter, sleep_inteval=1, include_reupload_video=include_reupload_video)
 if len(skipped_aid)>0: logging.warning("被跳过的 aid: " + str(skipped_aid))
 if len(invalid_aid)>0: logging.info("无效或被过滤的 aid: " + str(invalid_aid))
 marshal.dump(invalid_aid, open(os.path.join(data_path, "invalid_aid.pkl"), "wb"))

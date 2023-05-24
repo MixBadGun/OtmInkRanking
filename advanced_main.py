@@ -3,7 +3,7 @@ import time
 import logging
 import os
 from config import *
-from auto_pipeline import all_video_info , aid_to_score_norm
+from get_video_info_score import all_video_info , aid_to_score_norm
 from function import passMn,short_text
 import shutil
 # 新建文件夹
