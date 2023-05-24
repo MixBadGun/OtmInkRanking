@@ -55,7 +55,7 @@ def get_info(page: int, video_zone: int, ps=20):
     
     if return_code != 0:
         return [return_code, return_message], -1
-    video_list: Dict[str, Any] = result["data"]["archives"]
+    video_list: List[Dict[str, Any]] = result["data"]["archives"]
 
     for i, video in enumerate(video_list):
         # video.pop('tid')
@@ -87,6 +87,8 @@ def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: s
     video_per_page:int = 25
     page_change_step = 1 # page step of searching which page the dst video in
     page_status_dict: Dict[int, bool] = dict()
+    is_video_after_dst_time: List[bool] = []
+    info_page: List[Dict[str, Any]] = []
     while True:
         if page_index not in page_status_dict:
             info_page, _ = get_info(page_index, video_zone, video_per_page)
@@ -146,6 +148,7 @@ def retrieve_video_info(src_timestamp: float, dst_timestamp: float, data_path: s
     marshal.dump(all_video_info, open(os.path.join(data_path, video_info_file_name), "wb"))
     return all_video_info
 
+# comment 具体格式见 https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/comment
 def reply_processer(comments: List[Dict]) -> List[Dict]:
     processed_comments = []
     for comment in comments:
@@ -171,6 +174,7 @@ async def get_comments(aid: int) -> List[Dict]:
     count = 0
     while True:
         c = await comment.get_comments(aid, comment.ResourceType.VIDEO, page)
+        assert type(c) is dict
         if "replies" not in c or c['replies'] is None: break
         comments.extend(c['replies'])
         count += c['page']['size']
@@ -229,7 +233,7 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], white
     return skipped_aid, invalid_aid
 
 def calc_aid_score(video_info: Dict, comment_list: Optional[List[Dict]], good_key_words: List[str], bad_key_words: List[str], all_mid_list: Dict[int, Dict], s2_base:float=0, show_verbose=False) -> Tuple[float, float]:
-    if list(comment_list)==0: return 0, 0
+    if comment_list is None or list(comment_list)==0: return 0, 0
     aid_score = 0
     for comment in comment_list:
         comment_mid   = comment["mid"]
@@ -288,6 +292,7 @@ def retrieve_single_video_comment(video_aid: int, max_try_times=10, sleep_inteva
 
 def apply_bilibili_api(task: Callable, video_aid: int, max_try_times=10, sleep_inteval=3) -> Tuple[int, List[Dict]]:
     try_times = 0
+    contents: List[Dict] = []
     while try_times < max_try_times:
         try: 
             contents = sync(task())
