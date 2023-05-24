@@ -43,7 +43,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
         else:
             normk = 1
         if str(all_video_info[video]["copyright"]) not in ["1",1]:
-            author_name = "转载"
+            author_name = f"{all_video_info[video]['owner']['name']} | 转载"
         else:
             author_name = str(all_video_info[video]["owner"]["name"])
         norm_score = float('%.3f' % (aid_to_score_norm[all_video_info[video]["aid"]] * normk))
