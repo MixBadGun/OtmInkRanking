@@ -16,7 +16,7 @@ console_handler.setFormatter(formatter)
 console_handler.setLevel('DEBUG')
 logger = logging.getLogger()
 logger.addHandler(console_handler)
-import danmuku_time
+from danmuku_time import danmuku_time
 
 # 新建文件夹
 
@@ -73,7 +73,7 @@ for viding in ranked_list:
             MainToSideVideo(aid,0,sep_time,ranking)
             continue
     if st_name == "":
-        start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
+        start_time,end_time = danmuku_time(aid,cid,full_time,sep_time)
     else:
         start_time,end_time = int(st_name),sep_time
     muitl_limit.acquire()
@@ -96,7 +96,7 @@ for picking in picked_list:
     cid = picking[2]
     getVideo(aid,1)
     full_time = exactVideoLength(aid)
-    start_time,end_time = danmuku_time.danmuku_time(aid,cid,full_time,sep_time)
+    start_time,end_time = danmuku_time(aid,cid,full_time,sep_time)
     muitl_limit.acquire()
     single_render = threading.Thread(target=PickVideo,args=(aid,start_time,end_time,picks))
     single_render.start()
@@ -108,8 +108,8 @@ for fg in muitl_render:
 if os.path.exists("./output_clips/Opening.mp4"):
     pass
 else:
-    OpeningVideo(usedTime)
+    OpeningVideo()
 
 # 总拼接
 
-AllVideo(main_end,picked_list,usedTime)
+AllVideo(main_end,picked_list)

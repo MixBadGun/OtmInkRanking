@@ -45,7 +45,7 @@ def outVideo(file):
     aud = vi.audio
     return [viw,aud]
 
-def AllVideo(main_end,pickArr,usedTime):
+def AllVideo(main_end,pickArr):
     with open("./custom/data.csv", "r", encoding="utf-8-sig") as csvfile:
         reader = csv.reader(csvfile)
         main_rank_column = [row[0] for row in reader]

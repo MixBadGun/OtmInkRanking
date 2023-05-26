@@ -4,7 +4,7 @@ from config import *
 
 DisplayFont = './fonts/HarmonyOS_Sans_SC_Medium.ttf'
 
-def OpeningVideo(usedTime):
+def OpeningVideo():
     OpeningBack = ffmpeg.input("./template/opening/Opening.mp4")
     vi = OpeningBack.video
     au = OpeningBack.audio
