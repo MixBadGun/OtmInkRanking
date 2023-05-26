@@ -53,7 +53,7 @@ while(ranking < main_end):
     ranking += 1
 while(ranking < main_end + side_end):
     vid = ranked_list[ranking]
-    get_img(vid[2],side = True)
+    get_img(vid[2],side = True,copyright=vid[17])
     ranking += 1
 
 # Pick Up
