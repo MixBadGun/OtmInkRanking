@@ -49,14 +49,14 @@ for video_zone in video_zones:
         with open(video_info_collection_file_path, "r", encoding="utf-8") as f:
             all_video_info.update(json.load(f))
         continue
-    info_page, num_pages = get_info_by_time(1, video_zone, src_date_str, dst_date_str)
+    info_page, num_pages = get_info_by_time(1, video_zone, src_date_str, dst_date_str, copyright=str(pull_video_copyright)
     logging.info(f"分区 {video_zone} 的第 1 页完成，共 {num_pages} 页")
     all_video_info.update({i['id']:i for i in info_page})
     # 如果页数正向遍历，那么一旦有视频被删除，列表上之后的视频会向前挪动
     # 跨页挪动的视频就会被漏掉，所以反向遍历
     for page_index in range(num_pages, 1, -1):
         time.sleep(2.5 + random.random())
-        info_page, num_pages = get_info_by_time(page_index, video_zone, src_date_str, dst_date_str)
+        info_page, num_pages = get_info_by_time(page_index, video_zone, src_date_str, dst_date_str, copyright=str(pull_video_copyright))
         all_video_info.update({i['id']:i for i in info_page})
         logging.info(f"第 {page_index} 页完成")
     with open(video_info_collection_file_path, "w", encoding="utf-8") as f:
@@ -117,15 +117,16 @@ if __name__ == "__main__":
     for aid, aid_score in aid_and_score[:main_end+side_end]:
         print_aid_info(all_video_info[aid], aid_to_comment[aid],
                         target_good_key_words, target_bad_key_words, all_mid_list, verbose=False)
-pull_size = pull_full_list_stat and (main_end+side_end) or len(aid_and_score)
+pull_size = pull_full_list_stat and len(aid_and_score) or (main_end+side_end)
 selected_aid = [aid for aid, _ in aid_and_score[:pull_size]]
 logging.info(f"将获取排行前 {pull_size} 条视频的信息")
 _, _, selected_video_stat = retrieve_video_stat(data_path, selected_aid)
 logging.info(f"数据部分完成")
-...
+
+
 """
-# 各项意义见下 URL，实际稍有差别:
-# https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/search/search_response.md
+* 各项意义见下 URL，实际稍有差别:
+* https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/search/search_response.md
 >>> print(all_video_info[615690406])
 {
 日期'pubdate': '2023-07-09 16:14:23',

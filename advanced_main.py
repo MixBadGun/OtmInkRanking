@@ -57,7 +57,7 @@ with open("custom/data.csv","w",encoding="utf-8-sig",newline='') as csvfile:
             str(video_info["play"]),
             str(video_stat.get("like", "未取得")),
             str(video_stat.get("coin", "未取得")),
-            str(video_stat.get("favorites", "未取得")),
+            str(video_info["favorites"]),
             str(video_info["pic"]),
             str(video_info["pubdate"]),
             str(normk),

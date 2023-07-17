@@ -10,8 +10,8 @@ else:
         f.write(usedTime)
 
 ### 拉取数据相关 ###
-base_path = "./TestData/"       # 数据存储路径
-delta_days = 14                 # 以今天往前的第 delta_days 日开始统计
+base_path = "./AutoData/"       # 数据存储路径
+delta_days = 11                 # 以今天往前的第 delta_days 日开始统计
 range_days = 7                  # 统计 range_days 天的数据
 
 # 音 MAD: 26; 人力: 126; 鬼调: 22；不要用大分区，如 "119" (鬼畜)
