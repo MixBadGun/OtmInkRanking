@@ -148,3 +148,6 @@ lux.exe
 AutoData/**
 !AutoData/all_mid_list.dat
 !AutoData/这个 all_mid_list 不要删
+
+.vscode
+"config_login.py"
