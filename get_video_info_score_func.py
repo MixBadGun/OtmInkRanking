@@ -11,7 +11,7 @@ import math
 import requests
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 logging.getLogger("requests").setLevel(logging.WARNING)
-
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 # pip install bilibili_api_python
 from bilibili_api import comment, sync, video
 from bilibili_api import Credential
@@ -111,7 +111,7 @@ async def get_comments(aid: int, credential: Credential) -> List[Dict]:
         time.sleep(1)
     return reply_trimmer(comments)
 
-def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[Set[int], Set[int]]:
+def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force_update=False, max_try_times=10, sleep_inteval=3.) -> Tuple[Set[int], Set[int]]:
     from config_login import sessdata, bili_jct, buvid3, dedeuserid
     credential = Credential(sessdata=sessdata, bili_jct=bili_jct, buvid3=buvid3)
     skipped_aid = set()
@@ -138,14 +138,14 @@ def retrieve_video_comment(data_path:str, all_video_info: Dict[int, Dict], force
         with open(comment_file_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(comments, ensure_ascii=False, indent=4))
         if video_info["review"]>20*2 and len(comments)==20: 
-            logging.warning(f"获取 av{video_aid} 评论数 {len(comments): 4} 过少，若此问题多次出现需考虑重新获取 Cookie；进度 {n+1: 4} / {len(all_video_info)}")
+            logging.warning(f"获取 av{video_aid} 评论数{len(comments): 4} 过少，若此问题多次出现需考虑重新获取 Cookie；进度 {n+1: 4} / {len(all_video_info)}")
         else:
             logging.debug(f"获取 av{video_aid} 评论成功，计评论数{len(comments): 4}, 进度 {n+1: 4} / {len(all_video_info)}")
     
     if len(invalid_aid)>0: marshal.dump(invalid_aid, open(os.path.join(data_path, "invalid_aid.pkl"), "wb"))
     return skipped_aid, invalid_aid
 
-def retrieve_video_stat(data_path:str, aid_list:List[int], force_update=False, max_try_times=10, sleep_inteval=3) -> Tuple[Set[int], Set[int], Dict[int, Dict]]:
+def retrieve_video_stat(data_path:str, aid_list:List[int], force_update=False, max_try_times=10, sleep_inteval=3.) -> Tuple[Set[int], Set[int], Dict[int, Dict]]:
     skipped_aid = set()
     invalid_aid_path = os.path.join(data_path, "invalid_aid.pkl")
     if os.path.exists(invalid_aid_path): invalid_aid = marshal.load(open(invalid_aid_path, "rb"))
@@ -228,18 +228,18 @@ def retrieve_single_video_tag(video_aid: int, max_try_times=10, sleep_inteval=3)
     tags = [tag['tag_name'] for tag in tags_raw]
     return status, tags
 
-def retrieve_single_video_comment(video_aid: int, credential: Credential, max_try_times=10, sleep_inteval=3) -> Tuple[int, List[Dict]]:
+def retrieve_single_video_comment(video_aid: int, credential: Credential, max_try_times=10, sleep_inteval=3.) -> Tuple[int, List[Dict]]:
     task = partial(get_comments, video_aid, credential)
     status, comments_raw = apply_bilibili_api(task, video_aid, max_try_times, sleep_inteval)
     return status, comments_raw
 
-def retrieve_single_video_stat(video_aid: int, max_try_times=10, sleep_inteval=3) -> Tuple[int, Dict[str, Any]]:
+def retrieve_single_video_stat(video_aid: int, max_try_times=10, sleep_inteval=3.) -> Tuple[int, Dict[str, Any]]:
     task = video.Video(aid=video_aid).get_stat
     status, stat = apply_bilibili_api(task, video_aid, max_try_times, sleep_inteval)
     assert isinstance(stat, dict)
     return status, stat
 
-def apply_bilibili_api(task: Callable, video_aid: int, max_try_times=10, sleep_inteval=3) -> Tuple[int, List[Dict]]:
+def apply_bilibili_api(task: Callable, video_aid: int, max_try_times=10, sleep_inteval=3.) -> Tuple[int, List[Dict]]:
     try_times = 0
     contents: List[Dict] = []
     while try_times < max_try_times:

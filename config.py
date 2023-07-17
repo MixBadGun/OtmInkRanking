@@ -10,6 +10,8 @@ else:
         f.write(usedTime)
 
 ### 拉取数据相关 ###
+sleep_inteval = 2.5             # 各处重复调用 api 的间隔秒数
+
 base_path = "./AutoData/"       # 数据存储路径
 delta_days = 11                 # 以今天往前的第 delta_days 日开始统计
 range_days = 7                  # 统计 range_days 天的数据

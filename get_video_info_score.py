@@ -7,7 +7,7 @@ import logging
 from collections import defaultdict
 from config import base_path, delta_days, range_days, pull_video_copyright, video_zones
 from config import tag_whitelist, tag_whitezone, prefilter_comment_less_than, main_end, side_end
-from config import pull_full_list_stat
+from config import pull_full_list_stat, sleep_inteval
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s@%(funcName)s: %(message)s')
 
 from get_video_info_score_func import *
@@ -55,7 +55,7 @@ for video_zone in video_zones:
     # 如果页数正向遍历，那么一旦有视频被删除，列表上之后的视频会向前挪动
     # 跨页挪动的视频就会被漏掉，所以反向遍历
     for page_index in range(num_pages, 1, -1):
-        time.sleep(2.5 + random.random())
+        time.sleep(sleep_inteval + random.random())
         info_page, num_pages = get_info_by_time(page_index, video_zone, src_date_str, dst_date_str, copyright=str(pull_video_copyright))
         all_video_info.update({i['id']:i for i in info_page})
         logging.info(f"第 {page_index} 页完成")
@@ -70,7 +70,7 @@ comment_count_filter = lambda video_info: (video_info["review"] > prefilter_comm
 all_video_info = {k:v for k,v in all_video_info.items() if comment_count_filter(v)}
 logging.info("按评论数过滤后，待拉取视频数: " + str(len(all_video_info)))
 
-skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, force_update=False)
+skipped_aid, invalid_aid = retrieve_video_comment(data_path, all_video_info, force_update=False, sleep_inteval=sleep_inteval)
 if len(skipped_aid)>0:
     logging.warning("被跳过的 aid: " + str(skipped_aid))
 if len(invalid_aid)>0:
@@ -93,7 +93,7 @@ for aid, video_info in all_video_info.items():
     comment_file_path = os.path.join(comment_dir, video_info['pubdate'][:10], f"{aid}.json")
     if not (os.path.exists(comment_file_path) or aid in invalid_aid):
         logging.warning(f"comment file {comment_file_path} not found")
-        _, invalid_aid = retrieve_video_comment(data_path, all_video_info, force_update=False)
+        _, invalid_aid = retrieve_video_comment(data_path, all_video_info, force_update=False, sleep_inteval=sleep_inteval)
         if not os.path.exists(comment_file_path) or aid in invalid_aid: continue
     if aid not in invalid_aid:
         with open(comment_file_path, "r", encoding="utf-8") as f:
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 pull_size = pull_full_list_stat and len(aid_and_score) or (main_end+side_end)
 selected_aid = [aid for aid, _ in aid_and_score[:pull_size]]
 logging.info(f"将获取排行前 {pull_size} 条视频的信息")
-_, _, selected_video_stat = retrieve_video_stat(data_path, selected_aid)
+_, _, selected_video_stat = retrieve_video_stat(data_path, selected_aid, sleep_inteval=sleep_inteval)
 logging.info(f"数据部分完成")
 
 
