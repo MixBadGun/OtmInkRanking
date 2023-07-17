@@ -44,8 +44,8 @@ def get_page_count(video_zone: int) -> int:
 def get_info_by_time(page_index: int, video_zone: int, time_from: str, time_to: str, ps=50, copyright="-1"):
     """
     :param time_from: 起始日期, 格式: yyyymmdd, 如: 20230701, 指此日期的 00:00 为始
-    :param time_to: 结束日期, 格式: yyyymmdd, 如: 20230701, 指此日期的 23:59 为止
-    :param ps: 每页视频数量，太大易被 ban
+    :param time_to:   结束日期, 格式: yyyymmdd, 如: 20230701, 指此日期的 23:59 为止
+    :param ps:        每页视频数量，太大易被 ban
     :param copyright: "1": 自制, "0": 转载, "-1": 不限制
     """
     headers = {

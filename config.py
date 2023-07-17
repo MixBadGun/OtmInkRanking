@@ -16,7 +16,7 @@ range_days = 7                  # 统计 range_days 天的数据
 
 # 音 MAD: 26; 人力: 126; 鬼调: 22；不要用大分区，如 "119" (鬼畜)
 # 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/video_zone.md
-video_zones = [26, 126, 22]
+video_zones = [26, 126, 22]     # 拉取这些分区的视频列表
 tag_whitezone = [26]            # 仅统计此分区，以及
 tag_whitelist = ['音mad', "ytpmv"] # 含有这些 tag 的视频, 西文使用全小写
 pull_video_copyright = -1       # 1: 仅自制, 0: 仅转载, -1: 全部

@@ -49,7 +49,7 @@ for video_zone in video_zones:
         with open(video_info_collection_file_path, "r", encoding="utf-8") as f:
             all_video_info.update(json.load(f))
         continue
-    info_page, num_pages = get_info_by_time(1, video_zone, src_date_str, dst_date_str, copyright=str(pull_video_copyright)
+    info_page, num_pages = get_info_by_time(1, video_zone, src_date_str, dst_date_str, copyright=str(pull_video_copyright))
     logging.info(f"分区 {video_zone} 的第 1 页完成，共 {num_pages} 页")
     all_video_info.update({i['id']:i for i in info_page})
     # 如果页数正向遍历，那么一旦有视频被删除，列表上之后的视频会向前挪动
