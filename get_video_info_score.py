@@ -117,7 +117,7 @@ if __name__ == "__main__":
     for aid, aid_score in aid_and_score[:main_end+side_end]:
         print_aid_info(all_video_info[aid], aid_to_comment[aid],
                         target_good_key_words, target_bad_key_words, all_mid_list, verbose=False)
-pull_size = pull_full_list_stat and len(aid_and_score) or (main_end+side_end)
+pull_size = pull_full_list_stat if pull_full_list_stat>0 else len(aid_and_score)
 selected_aid = [aid for aid, _ in aid_and_score[:pull_size]]
 logging.info(f"将获取排行前 {pull_size} 条视频的信息")
 _, _, selected_video_stat = retrieve_video_stat(data_path, selected_aid, sleep_inteval=sleep_inteval)
